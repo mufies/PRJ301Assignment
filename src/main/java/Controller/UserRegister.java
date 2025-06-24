@@ -1,6 +1,5 @@
 package Controller;
 
-import DAO.UserDAO;
 import DAO.UserDAOImpl;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;

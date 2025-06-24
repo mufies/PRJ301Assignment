@@ -14,7 +14,7 @@ public class JwtUtils {
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 3600_000*12))
+                .setExpiration(new Date(System.currentTimeMillis() + 30 * 60 * 1000))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -28,4 +28,16 @@ public class JwtUtils {
                 .getSubject();
         return subject.equals(username);
     }
+    public static String getUsernameFromToken(String token) {
+        if (token == null || token.trim().isEmpty()) {
+            return null;
+        }
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
+
 }
