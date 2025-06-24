@@ -1,0 +1,274 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : Jun 13, 2025, 10:09:21 PM
+    Author     : ADMIN
+*/
+body {
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #FFF0DD;
+    color: #333;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 40px;
+    background: #FFF0DD;
+}
+
+.logo img {
+    height: 110px;
+}
+
+nav a {
+    margin: 0 15px;
+    text-decoration: none;
+    color: #9B3F3F;
+    font-weight: bold;
+}
+
+.login-btn {
+    background-color: #9B3F3F;
+    color: #FFF0DD;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+#forgotPasswordModal.modal {
+    position: fixed;
+    z-index: 1001;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: auto;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#forgotPasswordModal .modal-content {
+    background: #fff;
+    padding: 30px 40px;
+    border-radius: 8px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.2);
+    min-width: 320px;
+    max-width: 90vw;
+}
+.highlight {
+    text-align: left;
+    padding: 50px 40px;
+    background: #FFF0DD;
+}
+
+.highlight h1 {
+    font-family: 'Playfair Display';
+    font-size: 3em;
+    margin: 0;
+} 
+
+.highlight_text {
+    color: #9B3F3F;
+}
+
+.highlight p {
+    margin-top: 10px;
+    font-size: 1.1em;
+    color: #555;
+}
+
+.order-btn {
+    margin-top: 20px;
+    padding: 12px 24px;
+    background-color: #9B3F3F;
+    color: #FFF0DD;
+    text-decoration: none;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+.banner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 0;
+    background-color: #FFF0DD;
+}
+
+.banner img {
+    max-width: 100%;
+    width: 90%;
+    height: auto;
+    border-radius: 10px;
+    object-fit: cover;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.about {
+    padding: 40px;
+}
+
+.about h2 {
+    font-size: 2em;
+    font-family: 'Playfair Display';
+    color: #9B3F3F;
+}
+
+.about-content {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 30px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.about-content .text {
+    flex: 1 1 60%;
+    font-size: 16px;
+    line-height: 1.7;
+    color: #333;
+}
+
+.about .images {
+    flex: 1 1 35%;
+}
+
+.about-content .images img {
+    width: 100%;
+    max-width: 450px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+.best-seller {
+    padding: 50px 40px;
+    background-color: #FFF0DD;
+}
+
+.best-seller h2 {
+    font-size: 3em;
+    font-family: 'Playfair Display', serif;
+    color: #9B3F3F;
+    margin-bottom: 30px;
+}
+
+.products {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 30px;
+    justify-items: center;
+}
+
+.product {
+    width: 180px;
+    text-align: center;
+}
+
+.product img {
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease;
+}
+
+.product img:hover {
+    transform: scale(1.05);
+}
+
+.product-name {
+    font-weight: bold;
+    font-size: 14px;
+    margin: 10px 0 4px;
+    color: #333;
+}
+
+.price {
+    font-size: 14px;
+    color: #777;
+}
+
+.view-all {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.view-all .order-btn {
+    background-color: #5F1D1D;
+    color: #fff;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.view-all .order-btn:hover {
+    background-color: #7A2B2B;
+}
+
+
+.feedback {
+    background-color: #FFF0DD;
+    padding: 40px;
+}
+
+.feedback h2 {
+    font-size: 24px;
+    color: #aa2a2a;
+    margin-bottom: 20px;
+    font-family: 'Playfair Display';
+}
+
+.feedbacks {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.fb-card {
+    background: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    width: 280px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.fb-text {
+    font-style: italic;
+}
+
+.fb-name {
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.rating {
+    color: orange;
+}
+
+footer {
+    background-color: #9D484F;
+    padding: 30px;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer contact-info {
+    color: #FFF0DD;
+}
+
+.logo-footer img {
+    width: 80px;
+}

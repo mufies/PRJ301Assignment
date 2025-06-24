@@ -13,13 +13,6 @@
 <body>
 <h1>Welcome</h1>
 
-<%
-    String jwt = (String) session.getAttribute("jwt");
-    if (jwt != null) {
-%>
-    <p>Your JWT: <%= jwt %></p>
-<%
-    }
-%>
+<p>Welcome to the application!</p>
 </body>
 </html>

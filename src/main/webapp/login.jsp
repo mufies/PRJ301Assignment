@@ -1,31 +1,35 @@
-
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
 <html>
 <head>
-    <title>Title</title>
+    <meta charset="UTF-8">
+    <title>Login - Mam Mam</title>
+    <link rel="stylesheet" href="css/login.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-<form method="post" action="login">
-    <label for="username">Username:</label>
-    <input type="text" id="username" name="username" required /><br />
+    <div class="login-container">
+        <img src="images/logo.png" alt="Mam Mam Logo" class="logo">
+        <h1 class="title">MĂM MĂM</h1>
+        <h2 class="subtitle">VUI LÒNG ĐĂNG NHẬP</h2>
+        
+        <form action="login" method="post">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" placeholder="Số điện thoại / Gmail" required>
 
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" required /><br />
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
 
-    <input type="submit" value="Login" />
+            <div class="forgot">
+                <a href="#">Quên mật khẩu?</a>
+            </div>
 
-    <a href="register">Register</a>
+            <button type="submit">Submit</button>
+        </form>
 
-</form>
-<%-- Display error message if login fails --%>
-<%
-    String errorMessage = (String) request.getAttribute("errorMessage");
-    if (errorMessage != null && !errorMessage.isEmpty()) {
-%>
-    <p style="color: red;"><%= errorMessage %></p>
-<%
-    }
-%>
-
+        <p class="register">
+            Bạn chưa có tài khoản? <a href="register.jsp"><strong>Đăng ký ngay</strong></a>
+        </p>
+    </div>
 </body>
 </html>
