@@ -45,20 +45,41 @@ document.addEventListener('DOMContentLoaded', function() {
             const cartItems = JSON.parse(sessionStorage.getItem('cart')) || [];
             const unloggedInList = cartPopup.querySelector('.cart-items.unlogged-in');
             unloggedInList.innerHTML = '';
+
+            // Merge items by productId
+            const mergedItems = {};
+            cartItems.forEach(item => {
+                const key = item.productId;
+                if (!mergedItems[key]) {
+                    mergedItems[key] = { ...item, quantity: 1 };
+                } else {
+                    mergedItems[key].quantity += 1;
+                }
+            });
+
+            // Optional: Debug log
+            // Object.values(mergedItems).forEach(item => {
+            //     console.log(item.productName, item.quantity);
+            // });
+
             let total = 0;
-            cartItems.forEach((item, index) => {
+            Object.values(mergedItems).forEach(item => {
                 const price = parseFloat(item.price || 0);
-                total += price;
+                const name = item.productName || "Unknown Product";
+                const itemTotal = price * item.quantity;
+                total += itemTotal;
+                console.log(item.productName);
                 const li = document.createElement('li');
-                const name = item.productName;
                 li.innerHTML = `
-                    <span class="cart-item-name">${name}</span>
-                    <span class="cart-item-price">${price}</span>
-                    <button class="remove-btn" onclick="removeFromCart(${index})">X</button>
-                `;
+            <span class="cart-item-name">${name}</span>
+            <span class="cart-item-quantity">x${item.quantity}</span>
+            <span class="cart-item-price">${itemTotal.toFixed(0)}</span>
+            <button class="remove-btn" onclick="removeFromCart('${item.productId}')">X</button>
+        `;
                 unloggedInList.appendChild(li);
             });
-            cartPopup.querySelector('.cart-total-price').textContent = total;
+
+            cartPopup.querySelector('.cart-total-price').textContent = total.toFixed(0);
             cartPopup.querySelector('.cart-items.logged-in').style.display = 'none';
             unloggedInList.style.display = '';
             cartPopup.classList.add('active');
@@ -114,9 +135,19 @@ function addToCart(productId, productName, image, price) {
     }
 }
 
-function removeFromCart(index) {
+function removeFromCart(productId) {
     let cart = JSON.parse(sessionStorage.getItem('cart')) || [];
-    cart.splice(index, 1);
+    const itemCount = cart.filter(item => item.productId === productId).length;
+
+    if (itemCount > 1) {
+        const index = cart.findIndex(item => item.productId === productId);
+        if (index !== -1) {
+            cart.splice(index, 1);
+        }
+    } else {
+        cart = cart.filter(item => item.productId !== productId);
+    }
+
     sessionStorage.setItem('cart', JSON.stringify(cart));
     updateCartCount();
 }

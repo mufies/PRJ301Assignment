@@ -89,6 +89,46 @@
     color: #333;
     cursor: pointer;
 }
+.user-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+    justify-content: center;
+    align-items: center;
+}
 
+.option-btn {
+    padding: 12px 20px;
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    transition: background-color 0.3s;
+    justify-content: center;
+}
+
+.option-btn:hover {
+    background-color: #e8e8e8;
+}
+
+.option-btn i {
+    width: 20px;
+}
+
+.logout-btn {
+    margin-top: 10px;
+    background-color: #ff4444;
+    color: white;
+    border: none;
+}
+
+.logout-btn:hover {
+    background-color: #cc0000;
+}
 
 
