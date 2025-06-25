@@ -20,10 +20,23 @@
             document.querySelectorAll('.category-list li').forEach(li => li.classList.remove('active'));
             document.getElementById(type).classList.add('active');
         }
+
+        function openUserModal() {
+            const jwt = localStorage.getItem('jwt');
+            if (isJwtValid(jwt)) {
+                document.getElementById('loggedModal').style.display = 'block';
+            } else {
+                openLoginModal();
+            }
+        }
+
+        function closeLoggedModal() {
+            document.getElementById('loggedModal').style.display = 'none';
+        }
+
         function updateCartCount() {
             const jwt = localStorage.getItem('jwt');
             if (isJwtValid(jwt)) {
-                // Đã đăng nhập: fetch số lượng từ server nếu muốn
                 fetch('menu', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -31,8 +44,8 @@
                 })
                     .then(res => res.json())
                     .then(cartItems => {
-                        document.getElementById('cart-count').textContent = cartItems.length;
-                    });
+                        const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+                        document.getElementById('cart-count').textContent = totalQuantity; });
             } else {
                 const cart = JSON.parse(sessionStorage.getItem('cart')) || [];
                 document.getElementById('cart-count').textContent = cart.length;
@@ -40,13 +53,21 @@
         }
         window.onload = function() {
             const jwt = localStorage.getItem('jwt');
-            if (isJwtValid(jwt)) {
-                const loginBtn = document.querySelector('.login-btn');
+            const loginBtn = document.querySelector('.login-btn');
+
+            if (jwt && isJwtValid(jwt)) {
                 if (loginBtn) {
                     loginBtn.innerHTML = '<i class="fa-solid fa-user" style="font-size: 15px"></i>';
+                    loginBtn.onclick = openUserModal;
+                }
+                document.getElementById('loggedModal').style.display = 'none';
+            } else {
+                if (loginBtn) {
+                    loginBtn.innerHTML = 'Login';
                     loginBtn.onclick = openLoginModal;
                 }
             }
+
             filterMenu('starter');
             updateCartCount();
         };
@@ -77,6 +98,17 @@
             if (event.target === modal) {
                 closeLoginModal();
             }
+            const loggedModal = document.getElementById('loggedModal');
+            if (event.target === loggedModal) {
+                closeLoggedModal();
+            }
+        }
+        function logout() {
+            localStorage.removeItem('jwt');
+            document.querySelector('.login-btn').innerHTML = 'Login';
+            document.getElementById('loggedModal').style.display = 'none';
+            updateCartCount();
+            window.location.href = '/menu';
         }
     </script>
 </head>
@@ -86,7 +118,7 @@
         <img src="images/logo.png" alt="Mam Mam Logo">
     </div>
     <nav>
-        <a href="">Home</a>
+        <a href="index.jsp">Home</a>
         <a href="menu">Menu</a>
         <a href="#">Contact</a>
         <button class="login-btn" onclick="openLoginModal()">Login</button>
@@ -162,6 +194,27 @@
     </div>
 </div>
 
+<div id="loggedModal" class="modal" style="display: none;">    <div class="modal-content">
+        <span class="close" onclick="closeLoggedModal()">&times;</span>
+        <img src="images/logo.png" alt="Mam Mam Logo" class="modal-logo">
+        <h2 class="modal-subtitle">TÀI KHOẢN CỦA BẠN</h2>
+        <div class="user-options" style="justify-content: center; align-items: center;">
+            <button class="option-btn" onclick="window.location.href='settings.jsp'" style="justify-content: center; align-items: center;">
+                <i class="fa-solid fa-gear"></i>
+                Cài đặt tài khoản
+            </button>
+            <button class="option-btn" onclick="window.location.href='history.jsp'" style="justify-content: center; align-items: center;">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                Lịch sử mua hàng
+            </button>
+            <button class="option-btn logout-btn" onclick="logout()" style="justify-content: center; align-items: center;">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                Đăng xuất
+            </button>
+        </div>
+    </div>
+</div>
+
 <div class="cart-icon">
     <i class="fa-solid fa-cart-shopping"></i>
     <span class="cart-count" id="cart-count">0</span>
@@ -174,29 +227,10 @@
         <span>Total: </span>
         <span class="cart-total-price"></span>
     </div>
-    <button class="checkout-btn" onclick="window.location.href='<%=request.getContextPath()%>/checkout'">Checkout</button>
+    <button class="checkout-btn" onclick="window.location.href='/checkout'">Checkout</button>
 </div>
 
 <script>
-
-    // function removeFromCartServer(productId) {
-    //     const jwt = localStorage.getItem('jwt');
-    //     fetch('menu', {
-    //         method: 'DELETE',
-    //         headers: { 'Content-Type': 'application/json' },
-    //         body: JSON.stringify({ action: 'removeFromCart', productId, jwt })
-    //     })
-    //         .then(response => response.json())
-    //         .then(data => {
-    //             if (data.success) {
-    //                 // Reload popup cart
-    //                 document.querySelector('.cart-icon').click();
-    //                 updateCartCount();
-    //             } else {
-    //                 alert('Xóa sản phẩm thất bại');
-    //             }
-    //         });
-    // }
 
 
 </script>

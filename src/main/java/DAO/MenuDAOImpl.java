@@ -4,6 +4,8 @@ import Model.Dbconnect;
 import Model.Product;
 import com.sun.mail.imap.protocol.Item;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,20 +54,38 @@ public boolean addOrUpdateCart(int userID, int productId) {
     }
     return false;
 }
-public boolean removeFromCart(int userID, int productId) {
-    String sql = "DELETE FROM Cart WHERE user_id = ? AND product_id = ?";
-    try (Dbconnect db = new Dbconnect();
-         java.sql.Connection con = db.getConnection();
-         java.sql.PreparedStatement ps = con.prepareStatement(sql)) {
-        ps.setInt(1, userID);
-        ps.setInt(2, productId);
-        int rowsAffected = ps.executeUpdate();
-        return rowsAffected > 0;
-    } catch (Exception e) {
-        e.printStackTrace();
+    public boolean removeFromCart(int userID, int productId) {
+        String sql =
+                "IF EXISTS (SELECT 1 FROM Cart WHERE user_id = ? AND product_id = ? AND quantity > 1) " +
+                        "BEGIN " +
+                        "    UPDATE Cart SET quantity = quantity - 1 WHERE user_id = ? AND product_id = ?; " +
+                        "END " +
+                        "ELSE " +
+                        "BEGIN " +
+                        "    DELETE FROM Cart WHERE user_id = ? AND product_id = ?; " +
+                        "END";
+
+        try (Dbconnect db = new Dbconnect();
+             Connection con = db.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            // Set all 6 parameters
+            ps.setInt(1, userID);      // for IF EXISTS
+            ps.setInt(2, productId);
+            ps.setInt(3, userID);      // for UPDATE
+            ps.setInt(4, productId);
+            ps.setInt(5, userID);      // for DELETE
+            ps.setInt(6, productId);
+
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
-    return false;
-}
+
 
 
 
