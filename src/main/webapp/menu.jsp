@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/menu1.css">
     <link rel="stylesheet" href="css/login.css">
     <link rel="stylesheet" href="css/carticon.css">
+    <link rel="stylesheet" href="css/search.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script>
         function filterMenu(type) {
@@ -128,8 +129,11 @@
 <!-- Thanh trên cùng: Home > Menu | Search -->
 <div class="menu-top-bar">
     <h2>Home > Menu</h2>
-    <input type="text" class="search-box" placeholder="Search...">
-</div>
+<div id="inputContainer">
+            <input type="text" id="foodInput" onkeyup="fetchResults()" class="search-box" placeholder="Search...">
+            <div id="suggestionsPopup"></div>
+        </div>
+    </div>
 
 <!-- Nội dung chính -->
 <div class="menu-page">
@@ -235,6 +239,7 @@
 
 </script>
 <script src="js/cart.js"></script>
+<script src="js/search.js"></script>
 
 </body>
 </html>
