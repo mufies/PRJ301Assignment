@@ -1,6 +1,6 @@
 let allFoods = [];
 
-fetch("search")
+fetch(CONTEXT_PATH +"/search")
     .then(res => res.json())
     .then(data => {
         allFoods = data;
@@ -13,7 +13,7 @@ function removeVietnameseTones(str) {
         .replace(/Đ/g, "D");
 }
 
-function fetchResults() {
+function fetchResults(onSelectFood) {
     const inputRaw = document.getElementById("foodInput").value.trim().toLowerCase();
     const input = removeVietnameseTones(inputRaw);
     const popup = document.getElementById("suggestionsPopup");
@@ -55,6 +55,12 @@ function fetchResults() {
         name.style.fontSize = "16px";
         name.style.color = "#333";
 
+        const type = document.createElement("div");
+        type.textContent = "Loại: " + food.type;
+        type.style.color = "#555";
+        type.style.fontSize = "14px";
+        type.style.marginBottom = "5px";
+
         const price = document.createElement("div");
         price.textContent = "Giá: " + food.price + " ₫";
         price.style.color = "#28a745";
@@ -62,12 +68,14 @@ function fetchResults() {
 
         infoContainer.appendChild(name);
         infoContainer.appendChild(price);
-
+        infoContainer.appendChild(type);
         card.appendChild(img);
         card.appendChild(infoContainer);
 
         card.onclick = () => {
-            addToCart(food.id.toString(), food.name, food.img, food.price.toFixed(0).toString());
+            if (typeof onSelectFood === 'function') {
+                onSelectFood(food);
+            }
         };
 
         popup.appendChild(card);
@@ -75,6 +83,9 @@ function fetchResults() {
 
     popup.style.display = "block";
 }
+
+
+
 
 document.addEventListener("click", function (e) {
     const popup = document.getElementById("suggestionsPopup");

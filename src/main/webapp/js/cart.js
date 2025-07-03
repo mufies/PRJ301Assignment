@@ -105,7 +105,11 @@ document.querySelector('#loginModal form').onsubmit = async function(e) {
     const data = await response.json();
     if (data.success) {
         localStorage.setItem('jwt', data.token);
-        window.location.href = 'menu';
+        if( data.isAdmin) {
+            window.location.href = 'ayxkix';
+        } else {
+            window.location.href = 'menu';
+        }
     } else {
         alert('Login failed: ' + (data.errorMessage || 'Unknown error'));
     }

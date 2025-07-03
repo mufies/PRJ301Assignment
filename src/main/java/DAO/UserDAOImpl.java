@@ -1,8 +1,13 @@
 package DAO;
 import Model.*;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class UserDAOImpl {
 
@@ -71,26 +76,25 @@ public class UserDAOImpl {
         return null;
     }
 
-    public String getUserRank(String username) {
-        String sql = "select count(userid) from BuyHistory where username = ?";
+    public Admin loginAdmin(String username, String password) {
+        String sql = "select * from Admin where username = ? and password = ?";
         try (Dbconnect db = new Dbconnect();
              java.sql.Connection con = db.getConnection();
              java.sql.PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, username);
+            ps.setString(2, password);
             java.sql.ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                int count = rs.getInt(1);
-                if (count >= 100) {
-                    return "VIP";
-                } else if (count >= 50) {
-                    return "Gold";
-                } else if (count >= 20) {
-                    return "Silver";
-                } else {
-                    return "Bronze";
-                }
+                Admin admin = new Admin();
+                admin.setAdminId(rs.getInt("admin_id"));
+                admin.setUsername(rs.getString("username"));
+                admin.setPassword(rs.getString("password"));
+                admin.setFullName(rs.getString("full_name"));
+                admin.setEmail(rs.getString("email"));
+                admin.setPhone(rs.getString("phone"));
+                return admin;
             }
 
         } catch (Exception e) {
@@ -100,20 +104,6 @@ public class UserDAOImpl {
         return null;
     }
 
-    public void updateUserRank(String username, String rank) {
-        String sql = "update ShopUser set rank = ? where username = ?";
-        try (Dbconnect db = new Dbconnect();
-             java.sql.Connection con = db.getConnection();
-             java.sql.PreparedStatement ps = con.prepareStatement(sql)) {
-
-            ps.setString(1, rank);
-            ps.setString(2, username);
-            ps.executeUpdate();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     public boolean forgotPassword(String email, String newPassword) {
         String sql = "update Users set password = ? where email = ?";
@@ -198,6 +188,110 @@ public class UserDAOImpl {
         }
         return  products;
     }
+
+    public List<User> getAllUsers() {
+        List<User> users = new ArrayList<>();
+        String sql = """
+            SELECT 
+                u.user_id,
+                u.full_name AS name,
+                u.username,
+                u.password,
+                u.full_name,
+                u.email,
+                u.phone,
+                u.address,
+                SUM(o.total_money) AS total_spent
+            FROM dbo.Users u
+            JOIN dbo.Orders o ON u.user_id = o.user_id
+            GROUP BY 
+                u.user_id, u.username, u.password, u.full_name, u.email, u.phone, u.address
+        """;
+
+        try (Dbconnect db = new Dbconnect();
+             java.sql.Connection con = db.getConnection();
+             java.sql.PreparedStatement ps = con.prepareStatement(sql)) {
+
+            java.sql.ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                User user = new User();
+                user.setId(rs.getInt("user_id"));
+                user.setFullName(rs.getString("name"));
+                user.setEmail(rs.getString("email"));
+                user.setPhoneNumber(rs.getString("phone"));
+                user.setTotalSpent(rs.getLong("total_spent"));
+                user.setAddress(rs.getString("address"));
+                user.setUsername(rs.getString("username"));
+                user.setPassword(rs.getString("password"));
+                users.add(user);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
+
+    public List<User> getUserByNumber(String phoneNumber) {
+        List<User> users = new ArrayList<>();
+        Set<String> nameSet = new HashSet<>(); // Để kiểm tra trùng tên (full_name)
+
+        String sql1 = "SELECT user_id,username,password,full_name, email, phone,address FROM Users WHERE phone = ?";
+        try (Dbconnect db = new Dbconnect();
+             Connection con = db.getConnection();
+             PreparedStatement ps1 = con.prepareStatement(sql1)){
+
+            // Query bảng Users
+            ps1.setString(1, phoneNumber);
+            ResultSet rs1 = ps1.executeQuery();
+            while (rs1.next()) {
+                String name = rs1.getString("full_name");
+                if (name != null && nameSet.add(name.trim().toLowerCase())) { // chỉ thêm nếu chưa có
+                    User user = new User();
+                    user.setId(rs1.getInt("user_id"));
+                    user.setFullName(name);
+                    user.setEmail(rs1.getString("email"));
+                    user.setPhoneNumber(rs1.getString("phone"));
+                    user.setAddress(rs1.getString("address"));
+                    user.setUsername(rs1.getString("username"));
+                    user.setPassword(rs1.getString("password"));
+                    users.add(user);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
+
+    public boolean deleteUserById(int userId) {
+        String sql = "DELETE FROM Users WHERE user_id = ?";
+        try (Dbconnect db = new Dbconnect();
+             java.sql.Connection con = db.getConnection();
+             java.sql.PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean editUserById(int userId)
+    {
+        String sql = "UPDATE Users SET full_name = ?, email = ?, phone = ? WHERE user_id = ?";
+        return false;
+    }
+
+
+
+
+
+
 
 
 }

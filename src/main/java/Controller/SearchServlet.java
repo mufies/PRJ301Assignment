@@ -30,6 +30,7 @@ for (Product product : foods) {
     JSONObject obj = new JSONObject();
     obj.put("id", product.getProductId());
     obj.put("name", product.getProductName());
+    obj.put("type", product.getType());
     obj.put("img", product.getImage());
     obj.put("price", product.getPrice());
     foodsJson.put(obj);
