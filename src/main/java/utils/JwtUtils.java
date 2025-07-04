@@ -15,34 +15,34 @@ public class JwtUtils {
     private static final Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
     private static final String ENCRYPTION_KEY = "aX9bK4mP2nL7vQ5s"; // 16 bytes for AES-128
 
-    public static String encrypt(String data) {
-        try {
-            SecretKeySpec secretKey = new SecretKeySpec(ENCRYPTION_KEY.getBytes(StandardCharsets.UTF_8), "AES");
-            Cipher cipher = Cipher.getInstance("AES");
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-
-            byte[] encryptedBytes = cipher.doFinal(data.getBytes());
-            return Base64.getEncoder().encodeToString(encryptedBytes);
-        } catch (Exception e) {
-            throw new RuntimeException("Error encrypting data", e);
-        }
-    }
-
-    public static String decrypt(String encryptedData) {
-        try {
-            SecretKeySpec secretKey = new SecretKeySpec(ENCRYPTION_KEY.getBytes(StandardCharsets.UTF_8), "AES");
-            Cipher cipher = Cipher.getInstance("AES");
-            cipher.init(Cipher.DECRYPT_MODE, secretKey);
-
-            byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedData));
-            return new String(decryptedBytes);
-        } catch (Exception e) {
-            throw new RuntimeException("Error decrypting data", e);
-        }
-    }
+//    public static String encrypt(String data) {
+//        try {
+//            SecretKeySpec secretKey = new SecretKeySpec(ENCRYPTION_KEY.getBytes(StandardCharsets.UTF_8), "AES");
+//            Cipher cipher = Cipher.getInstance("AES");
+//            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+//
+//            byte[] encryptedBytes = cipher.doFinal(data.getBytes());
+//            return Base64.getEncoder().encodeToString(encryptedBytes);
+//        } catch (Exception e) {
+//            throw new RuntimeException("Error encrypting data", e);
+//        }
+//    }
+//
+//    public static String decrypt(String encryptedData) {
+//        try {
+//            SecretKeySpec secretKey = new SecretKeySpec(ENCRYPTION_KEY.getBytes(StandardCharsets.UTF_8), "AES");
+//            Cipher cipher = Cipher.getInstance("AES");
+//            cipher.init(Cipher.DECRYPT_MODE, secretKey);
+//
+//            byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedData));
+//            return new String(decryptedBytes);
+//        } catch (Exception e) {
+//            throw new RuntimeException("Error decrypting data", e);
+//        }
+//    }
 
     public static String generateToken(String username,String role) {
-        return encrypt(Jwts.builder()
+        return (Jwts.builder()
                 .setSubject(username)
                 .claim("role", role)
                 .setIssuedAt(new Date())
@@ -65,11 +65,11 @@ public class JwtUtils {
         if (token1 == null || token1.trim().isEmpty()) {
             return null;
         }
-        String token = decrypt(token1);
+//        String token = decrypt(token1);
         return Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
-                .parseClaimsJws(token)
+                .parseClaimsJws(token1)
                 .getBody()
                 .getSubject();
     }

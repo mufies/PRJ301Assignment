@@ -9,65 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OrderDAOImpl {
-    public long getOrdertotalMoney() {
-        String sql = "SELECT count(total_money) FROM Orders where status = N'Đã giao'";
-        try (Dbconnect db = new Dbconnect();
-             java.sql.Connection con = db.getConnection();
-             java.sql.PreparedStatement ps = con.prepareStatement(sql)) {
-            java.sql.ResultSet rs = ps.executeQuery();
 
-            if (rs.next()) {
-                return rs.getLong(1);
-            }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
 
-    public long getOrdertotalMoneyGuest() {
-        String sql = "SELECT count(total_money) FROM OrdersGuest where status = N'Đã giao' AND  order_date >= DATEADD(MONTH, -6, GETDATE())";
-        try (Dbconnect db = new Dbconnect();
-             java.sql.Connection con = db.getConnection();
-             java.sql.PreparedStatement ps = con.prepareStatement(sql)) {
-            java.sql.ResultSet rs = ps.executeQuery();
 
-            if (rs.next()) {
-                return rs.getLong(1);
-            }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    public String getOrderJson() {
-        String sql = "SELECT o.order_id, o.user_id, o.total_money, o.status, u.username " + "FROM Orders o JOIN Users u ON o.user_id = u.id";
-        StringBuilder jsonBuilder = new StringBuilder("[");
-        try (Dbconnect db = new Dbconnect();
-             java.sql.Connection con = db.getConnection();
-             java.sql.PreparedStatement ps = con.prepareStatement(sql);
-             java.sql.ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                jsonBuilder.append("{")
-                        .append("\"order_id\":").append(rs.getInt("order_id")).append(",")
-                        .append("\"user_id\":").append(rs.getInt("user_id")).append(",")
-                        .append("\"total_money\":").append(rs.getLong("total_money")).append(",")
-                        .append("\"status\":\"").append(rs.getString("status")).append("\",")
-                        .append("\"username\":\"").append(rs.getString("username")).append("\"")
-                        .append("},");
-            }
-            if (jsonBuilder.length() > 1) {
-                jsonBuilder.setLength(jsonBuilder.length() - 1); // Remove last comma
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        jsonBuilder.append("]");
-        return jsonBuilder.toString();
-    }
 
     public String getOrderByEachMonth() {
         String sql = "SELECT MONTH(order_date) AS month, SUM(total_money) AS total_money " +
@@ -413,6 +359,53 @@ public List<OrderItem> getGuestOrderItems(int orderId) {
     }
     return orderItems;
 }
+
+    public List<Order> getAllOrders()
+    {
+        String sql = "SELECT o.order_id, u.full_name, o.order_date, o.total_money, o.status, o.description " +
+                "FROM Orders o JOIN Users u ON o.user_id = u.user_id " +
+                "WHERE o.status = N'Đã giao'";
+        String sql2 = "SELECT * FROM OrdersGuest WHERE status = N'Đã giao'";
+        List<Order> orders = new ArrayList<>();
+        try (Dbconnect db = new Dbconnect();
+             Connection con = db.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             PreparedStatement ps2 = con.prepareStatement(sql2);
+             ResultSet rs = ps.executeQuery();
+             ResultSet rs2 = ps2.executeQuery()) {
+
+            while (rs.next()) {
+                Order order = new Order();
+                order.setOrderId(rs.getInt("order_id"));
+                order.setCustomerName(rs.getString("full_name"));
+                order.setOrderDate(rs.getString("order_date"));
+                order.setTotalAmount(rs.getLong("total_money"));
+                order.setStatus(rs.getString("status"));
+                order.setDescription(rs.getString("description"));
+                order.setLoggedIn(true);
+                orders.add(order);
+            }
+
+            while (rs2.next()) {
+                Order order = new Order();
+                order.setOrderId(rs2.getInt("order_id"));
+                order.setCustomerName(rs2.getString("guest_name"));
+                order.setOrderDate(rs2.getString("order_date"));
+                order.setTotalAmount(rs2.getLong("total_money"));
+                order.setStatus(rs2.getString("status"));
+                order.setDescription(rs2.getString("description"));
+                order.setLoggedIn(false);
+                orders.add(order);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return orders;
+    }
+
+
+
 
 
 

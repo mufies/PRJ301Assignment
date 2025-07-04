@@ -25,7 +25,6 @@ public class EmployeeManagementServlet extends HttpServlet {
             throws ServletException, IOException {
         DAO.EmployeeDAOImpl employeeDAO = new DAO.EmployeeDAOImpl();
         List<Employee> employeeList = employeeDAO.getAllEmployee();
-        System.out.println("Employee List Size: " + employeeList.size());
         request.setAttribute("empList", employeeList);
         RequestDispatcher rd = request.getRequestDispatcher("/employeeManagement.jsp");
         rd.forward(request, response);
@@ -86,6 +85,34 @@ public class EmployeeManagementServlet extends HttpServlet {
             out.println("</body></html>");
         }
     }
+
+    @Override
+    protected void doPut(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        JSONObject json = new JSONObject(new JSONTokener(request.getReader()));
+
+        int employeeId = json.getInt("employeeId");
+        String username = json.getString("username");
+        String password = json.getString("password");
+        String fullName = json.getString("fullName");
+        String email = json.getString("email");
+        String phone = json.getString("phone");
+        String address = json.getString("address");
+        String position = json.getString("position");
+        long salary = json.getLong("salary");
+
+        DAO.EmployeeDAOImpl employeeDAO = new DAO.EmployeeDAOImpl();
+        boolean success = employeeDAO.updateEmployee(employeeId, username, password, fullName, email, phone, address, position, salary);
+
+        if (success) {
+            response.setStatus(HttpServletResponse.SC_OK);
+        } else {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+
 
     @Override
     public String getServletInfo() {

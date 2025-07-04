@@ -29,18 +29,35 @@ public class OrderManagementServlet extends HttpServlet {
             if(order.isLoggedIn())
             {
                 List<OrderItem> orderItems = orderDAO.getOrderItems(order.getOrderId());
-                System.out.println("Order ID: " + order.getOrderId() + ", Items: " + orderItems.size());
                 order.setDetails(orderItems);
             }
             else
             {
                 List<OrderItem> orderItems = orderDAO.getGuestOrderItems(order.getOrderId());
-                System.out.println("Order ID: " + order.getOrderId() + ", Items: " + orderItems.size());
 
                 order.setDetails(orderItems);
             }
         }
         request.setAttribute("orderList", orderList);
+
+        List<Order> allOrders = orderDAO.getAllOrders();
+        for (Order order : allOrders) {
+            if(order.isLoggedIn())
+            {
+                List<OrderItem> orderItems = orderDAO.getOrderItems(order.getOrderId());
+                order.setDetails(orderItems);
+            }
+            else
+            {
+                List<OrderItem> orderItems = orderDAO.getGuestOrderItems(order.getOrderId());
+
+                order.setDetails(orderItems);
+            }
+        }
+        request.setAttribute("orders", allOrders);
+
+
+
 
         RequestDispatcher rd = request.getRequestDispatcher("/orderManagement.jsp");
         rd.forward(request, response);
@@ -49,6 +66,7 @@ public class OrderManagementServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
 
     }
 

@@ -72,7 +72,7 @@ public class EmployeeDAOImpl {
     }
 
     public boolean updateEmployee(int employeeId, String username, String password, String fullName, String email, String phone, String address, String position, long salary) {
-        String sql = "UPDATE Employee SET username = ?, password = ?, fullName = ?, email = ?, phone = ?, address = ?, position = ?, salary = ? WHERE employeeId = ?";
+        String sql = "UPDATE Employee SET username = ?, password = ?, full_name = ?, email = ?, phone = ?, address = ?, position = ?, salary = ? WHERE employee_id = ?";
         try (Dbconnect db = new Dbconnect();
              java.sql.Connection con = db.getConnection();
              java.sql.PreparedStatement ps = con.prepareStatement(sql)) {
@@ -96,7 +96,7 @@ public class EmployeeDAOImpl {
     }
 
     public boolean addEmployee(String username, String password, String fullName, String email, String phone, String address, java.util.Date hireDate, String position, long salary) {
-        String sql = "INSERT INTO Employee (username, password, full_name, email, phone, address, hire_date, position, salary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Employee (username, password, full_name, email, phone, address, hire_date, position, salary,status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,'Inactive')";
         try (Dbconnect db = new Dbconnect();
              java.sql.Connection con = db.getConnection();
              java.sql.PreparedStatement ps = con.prepareStatement(sql)) {

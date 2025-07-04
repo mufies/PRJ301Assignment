@@ -192,21 +192,21 @@ public class UserDAOImpl {
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
         String sql = """
-            SELECT 
-                u.user_id,
-                u.full_name AS name,
-                u.username,
-                u.password,
-                u.full_name,
-                u.email,
-                u.phone,
-                u.address,
-                SUM(o.total_money) AS total_spent
-            FROM dbo.Users u
-            JOIN dbo.Orders o ON u.user_id = o.user_id
-            GROUP BY 
-                u.user_id, u.username, u.password, u.full_name, u.email, u.phone, u.address
-        """;
+        SELECT 
+            u.user_id,
+            u.full_name AS name,
+            u.username,
+            u.password,
+            u.full_name,
+            u.email,
+            u.phone,
+            u.address,
+            COALESCE(SUM(o.total_money), 0) AS total_spent
+        FROM dbo.Users u
+        LEFT JOIN dbo.Orders o ON u.user_id = o.user_id
+        GROUP BY 
+            u.user_id, u.username, u.password, u.full_name, u.email, u.phone, u.address
+    """;
 
         try (Dbconnect db = new Dbconnect();
              java.sql.Connection con = db.getConnection();
@@ -232,41 +232,19 @@ public class UserDAOImpl {
         return users;
     }
 
-    public List<User> getUserByNumber(String phoneNumber) {
-        List<User> users = new ArrayList<>();
-        Set<String> nameSet = new HashSet<>(); // Để kiểm tra trùng tên (full_name)
 
-        String sql1 = "SELECT user_id,username,password,full_name, email, phone,address FROM Users WHERE phone = ?";
-        try (Dbconnect db = new Dbconnect();
-             Connection con = db.getConnection();
-             PreparedStatement ps1 = con.prepareStatement(sql1)){
 
-            // Query bảng Users
-            ps1.setString(1, phoneNumber);
-            ResultSet rs1 = ps1.executeQuery();
-            while (rs1.next()) {
-                String name = rs1.getString("full_name");
-                if (name != null && nameSet.add(name.trim().toLowerCase())) { // chỉ thêm nếu chưa có
-                    User user = new User();
-                    user.setId(rs1.getInt("user_id"));
-                    user.setFullName(name);
-                    user.setEmail(rs1.getString("email"));
-                    user.setPhoneNumber(rs1.getString("phone"));
-                    user.setAddress(rs1.getString("address"));
-                    user.setUsername(rs1.getString("username"));
-                    user.setPassword(rs1.getString("password"));
-                    users.add(user);
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return users;
-    }
 
     public boolean deleteUserById(int userId) {
-        String sql = "DELETE FROM Users WHERE user_id = ?";
+        String sql = """
+        UPDATE Users
+        SET
+            username = CONCAT('deleted_user_', CAST(RAND() * 100000 AS INT)),
+            password = CONCAT('deleted_pwd_', CAST(RAND() * 100000 AS INT)),
+            full_name = 'account deleted'
+        WHERE user_id = ? AND full_name != 'account deleted'
+    """;
+
         try (Dbconnect db = new Dbconnect();
              java.sql.Connection con = db.getConnection();
              java.sql.PreparedStatement ps = con.prepareStatement(sql)) {
@@ -281,11 +259,30 @@ public class UserDAOImpl {
         return false;
     }
 
-    public boolean editUserById(int userId)
-    {
-        String sql = "UPDATE Users SET full_name = ?, email = ?, phone = ? WHERE user_id = ?";
+
+
+    public boolean updateUser(int userId, String fullName, String email, String phone, String address, String password) {
+        String sql = "UPDATE Users SET full_name = ?, email = ?, phone = ?, address = ?, password = ? WHERE user_id = ?";
+        try (Dbconnect db = new Dbconnect();
+             java.sql.Connection con = db.getConnection();
+             java.sql.PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, fullName);
+            ps.setString(2, email);
+            ps.setString(3, phone);
+            ps.setString(4, address);
+            ps.setString(5, password);
+            ps.setInt(6, userId);
+
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return false;
     }
+
 
 
 
