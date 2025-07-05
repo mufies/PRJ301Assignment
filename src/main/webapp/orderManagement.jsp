@@ -7,6 +7,8 @@
     <title>Order Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <style>
         .order-detail { display: none; }
     </style>
@@ -59,6 +61,7 @@
         <input type="text" id="searchBox" class="form-control" placeholder="Tìm theo tên khách hàng...">
     </div>
 
+
     <table class="table table-hover" id="orderTable">
         <thead>
         <tr>
@@ -71,7 +74,7 @@
         </tr>
         </thead>
         <tbody>
-        <c:forEach var="o" items="${orders}">
+        <c:forEach var="o" items="${orderList}">
             <tr class="order-row">
                 <td>${o.orderId}</td>
                 <td class="customer-name">${o.customerName}</td>
@@ -106,6 +109,24 @@
         </tbody>
     </table>
 </div>
+<!-- Modal để hiển thị kết quả tìm kiếm -->
+<!-- Modal hiển thị kết quả -->
+<div class="modal fade" id="orderSearchModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Kết quả tìm kiếm đơn hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- duy nhất 1 id=orderResults -->
+            <div class="modal-body">
+                <div id="orderResults"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <script>
     function toggleDetail(orderId) {
@@ -117,20 +138,23 @@
         }
     }
 
-    // Simple client-side search
-    document.getElementById('searchBox').addEventListener('input', function () {
-        const keyword = this.value.toLowerCase();
-        const rows = document.querySelectorAll('#orderTable .order-row');
+    // // Simple client-side search
+    // document.getElementById('searchBox').addEventListener('input', function () {
+    //     const keyword = this.value.toLowerCase();
+    //     const rows = document.querySelectorAll('#orderTable .order-row');
+    //
+    //     rows.forEach(row => {
+    //         const name = row.querySelector('.customer-name').innerText.toLowerCase();
+    //         row.style.display = name.includes(keyword) ? '' : 'none';
+    //         const nextDetail = row.nextElementSibling;
+    //         if (nextDetail && nextDetail.classList.contains('order-detail')) {
+    //             nextDetail.style.display = 'none';
+    //         }
+    //     });
+    // });
 
-        rows.forEach(row => {
-            const name = row.querySelector('.customer-name').innerText.toLowerCase();
-            row.style.display = name.includes(keyword) ? '' : 'none';
-            const nextDetail = row.nextElementSibling;
-            if (nextDetail && nextDetail.classList.contains('order-detail')) {
-                nextDetail.style.display = 'none';
-            }
-        });
-    });
+
 </script>
+<script src="${pageContext.request.contextPath}/js/admin/orderUtils.js"></script>
 </body>
 </html>
