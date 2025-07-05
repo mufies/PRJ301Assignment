@@ -29,7 +29,30 @@
             max-width: 900px;           /* hoặc 600/700 tuỳ bạn */
         }
     </style>
+
     <script>
+        const token = localStorage.getItem('jwt');
+        if (!isJwtValid(token)) {
+            window.location.replace('<%=request.getContextPath()%>/menu');
+        } else {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                if (payload.role !== 'Admin') {
+                    window.location.replace('<%=request.getContextPath()%>/menu');
+                }
+            } catch (e) {
+                window.location.replace('<%=request.getContextPath()%>/menu');
+            }
+        }
+        function isJwtValid(token) {
+            if (!token) return false;
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                return !payload.exp || (Date.now() / 1000 < payload.exp);
+            } catch (e) {
+                return false;
+            }
+        }
 
     </script>
 </head>
@@ -164,6 +187,94 @@
                 </form>
             </div>
         </div>
+    </div>
+</div>
+
+<div id="addNewEmployee"  style="display: none;">
+    <div class="modal-content p-4 justify-content-center bg-white border rounded shadow-sm">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">Thêm</h4>
+            <button type="button" class="btn-close" onclick="closeAddNewEmployee()"></button>
+        </div>
+        <form id="employeeForm"
+              action="employee"
+              method="post"
+              class="row gy-2   gx-3 align-items-center mb-4">
+
+            <!-- Username -->
+            <div class="col-md-3">
+                <label for="username" class="form-label fw-semibold small mb-0">Username</label>
+                <input type="text" id="username" name="username"
+                       class="form-control" placeholder="username" required>
+            </div>
+
+            <!-- Mật khẩu -->
+            <div class="col-md-3">
+                <label for="password" class="form-label fw-semibold small mb-0">Mật khẩu</label>
+                <input type="password" id="password" name="password"
+                       class="form-control" placeholder="•••••••"
+                       minlength="3" required>
+            </div>
+
+            <!-- Họ tên -->
+            <div class="col-md-4">
+                <label for="fullName" class="form-label fw-semibold small mb-0">Họ tên</label>
+                <input type="text" id="fullName" name="fullName"
+                       class="form-control" placeholder="full name" required>
+            </div>
+
+            <!-- Điện thoại -->
+            <div class="col-md-2">
+                <label for="phone" class="form-label fw-semibold small mb-0">Điện thoại</label>
+                <input type="tel" id="phone" name="phone"
+                       class="form-control" placeholder="0909000001"
+                       pattern="0\d{9}" required>
+            </div>
+
+            <!-- Email -->
+            <div class="col-md-4">
+                <label for="email" class="form-label fw-semibold small mb-0">Email</label>
+                <input type="email" id="email" name="email"
+                       class="form-control" placeholder="...@example.com" required>
+            </div>
+
+            <!-- Địa chỉ -->
+            <div class="col-md-6">
+                <label for="address" class="form-label fw-semibold small mb-0">Địa chỉ</label>
+                <input type="text" id="address" name="address"
+                       class="form-control" placeholder="Số nhà, đường, phường, quận, thành phố">
+            </div>
+
+            <!-- Ngày vào làm -->
+            <div class="col-md-3">
+                <label for="hireDate" class="form-label fw-semibold small mb-0">Ngày vào làm</label>
+                <input type="date" id="hireDate" name="hireDate"
+                       class="form-control">
+            </div>
+
+            <!-- Chức vụ -->
+            <div class="col-md-3">
+                <label for="position" class="form-label fw-semibold small mb-0">Chức vụ</label>
+                <input type="text" id="position" name="position"
+                       class="form-control" placeholder="Nhân viên">
+            </div>
+
+            <!-- Lương -->
+            <div class="col-md-3">
+                <label for="salary" class="form-label fw-semibold small mb-0">Lương (VNĐ)</label>
+                <input type="number" id="salary" name="salary"
+                       class="form-control" min="0" step="1000"
+                       placeholder="5000000">
+            </div>
+
+            <!-- Nút gửi -->
+            <div class="col-md-2 d-grid">
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-person-plus-fill me-1"></i>
+                    Thêm
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
