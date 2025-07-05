@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="css/carticon.css">
     <link rel="stylesheet" href="css/search.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script>    const CONTEXT_PATH = "${pageContext.request.contextPath}";
+    </script>
     <script>
         function filterMenu(type) {
             const items = document.querySelectorAll('.product-item');
@@ -68,7 +70,11 @@
                     loginBtn.onclick = openLoginModal;
                 }
             }
-
+            document.getElementById("foodInput").addEventListener("keyup", function() {
+                fetchResults(function(food) {
+                    addToCart(food.id.toString(), food.name, food.img, food.price.toFixed(0).toString());
+                });
+            });
             filterMenu('starter');
             updateCartCount();
         };
@@ -111,6 +117,10 @@
             updateCartCount();
             window.location.href = '/menu';
         }
+
+
+
+
     </script>
 </head>
 <body>
@@ -129,8 +139,8 @@
 <!-- Thanh trên cùng: Home > Menu | Search -->
 <div class="menu-top-bar">
     <h2>Home > Menu</h2>
-<div id="inputContainer">
-            <input type="text" id="foodInput" onkeyup="fetchResults()" class="search-box" placeholder="Search...">
+        <div id="inputContainer">
+            <input type="text" id="foodInput" class="search-box" placeholder="Search...">
             <div id="suggestionsPopup"></div>
         </div>
     </div>

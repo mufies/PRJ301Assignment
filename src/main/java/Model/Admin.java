@@ -1,31 +1,31 @@
 package Model;
 
-public class User {
-    private int id;
+public class Admin {
+    private int adminId;
     private String username;
     private String password;
     private String fullName;
     private String email;
-    private String phoneNumber;
-    private String address;
-    private long totalSpent;
+    private String phone;
 
+    public Admin() {
+    }
 
-    public User(int id, String username, String password) {
-        this.id = id;
+    public Admin(int adminId, String username, String password, String fullName, String email, String phone) {
+        this.adminId = adminId;
         this.username = username;
         this.password = password;
+        this.fullName = fullName;
+        this.email = email;
+        this.phone = phone;
     }
 
-    public User() {
+    public int getAdminId() {
+        return adminId;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
+    public void setAdminId(int adminId) {
+        this.adminId = adminId;
     }
 
     public String getUsername() {
@@ -60,27 +60,11 @@ public class User {
         this.email = email;
     }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
+    public String getPhone() {
+        return phone;
     }
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public long getTotalSpent() {
-        return totalSpent;
-    }
-
-    public void setTotalSpent(long totalSpent) {
-        this.totalSpent = totalSpent;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 }
