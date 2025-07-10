@@ -121,6 +121,8 @@
 
 
 
+
+
     </script>
 </head>
 <body>
@@ -139,11 +141,11 @@
 <!-- Thanh trên cùng: Home > Menu | Search -->
 <div class="menu-top-bar">
     <h2>Home > Menu</h2>
-        <div id="inputContainer">
-            <input type="text" id="foodInput" class="search-box" placeholder="Search...">
-            <div id="suggestionsPopup"></div>
-        </div>
+    <div id="inputContainer">
+        <input type="text" id="foodInput" class="search-box" placeholder="Search...">
+        <div id="suggestionsPopup"></div>
     </div>
+</div>
 
 <!-- Nội dung chính -->
 <div class="menu-page">
@@ -209,24 +211,24 @@
 </div>
 
 <div id="loggedModal" class="modal" style="display: none;">    <div class="modal-content">
-        <span class="close" onclick="closeLoggedModal()">&times;</span>
-        <img src="images/logo.png" alt="Mam Mam Logo" class="modal-logo">
-        <h2 class="modal-subtitle">TÀI KHOẢN CỦA BẠN</h2>
-        <div class="user-options" style="justify-content: center; align-items: center;">
-            <button class="option-btn" onclick="window.location.href='settings.jsp'" style="justify-content: center; align-items: center;">
-                <i class="fa-solid fa-gear"></i>
-                Cài đặt tài khoản
-            </button>
-            <button class="option-btn" onclick="window.location.href='history.jsp'" style="justify-content: center; align-items: center;">
-                <i class="fa-solid fa-clock-rotate-left"></i>
-                Lịch sử mua hàng
-            </button>
-            <button class="option-btn logout-btn" onclick="logout()" style="justify-content: center; align-items: center;">
-                <i class="fa-solid fa-right-from-bracket"></i>
-                Đăng xuất
-            </button>
-        </div>
+    <span class="close" onclick="closeLoggedModal()">&times;</span>
+    <img src="images/logo.png" alt="Mam Mam Logo" class="modal-logo">
+    <h2 class="modal-subtitle">TÀI KHOẢN CỦA BẠN</h2>
+    <div class="user-options" style="justify-content: center; align-items: center;">
+        <button class="option-btn" onclick="window.location.href='settings.jsp'" style="justify-content: center; align-items: center;">
+            <i class="fa-solid fa-gear"></i>
+            Cài đặt tài khoản
+        </button>
+        <button class="option-btn" onclick="window.location.href='history.jsp'" style="justify-content: center; align-items: center;">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            Lịch sử mua hàng
+        </button>
+        <button class="option-btn logout-btn" onclick="logout()" style="justify-content: center; align-items: center;">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            Đăng xuất
+        </button>
     </div>
+</div>
 </div>
 
 <div class="cart-icon">
@@ -241,10 +243,190 @@
         <span>Total: </span>
         <span class="cart-total-price"></span>
     </div>
-    <button class="checkout-btn" onclick="window.location.href='/checkout'">Checkout</button>
+    <button class="checkout-btn" type="button" id="checkout-btn">Checkout</button>
 </div>
 
+<!-- Modal hỏi dùng giỏ hàng session sau khi login -->
+<div id="sessionCartChoiceModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span class="close" onclick="closeSessionCartChoiceModal()">&times;</span>
+        <h2>Bạn có giỏ hàng chưa thanh toán</h2>
+        <p>Bạn có muốn thanh toán các món đã bỏ vào giỏ hàng trước khi đăng nhập không?</p>
+        <div style="margin-top: 18px;">
+            <button onclick="proceedCheckoutWithSessionCart()">Có, thanh toán ngay</button>
+            <button onclick="clearSessionCartAndStay()">Không, xóa giỏ hàng này</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal hỏi đăng nhập khi checkout -->
+<div id="guestCheckoutModal" class="modal" style="display:none;">
+    <div class="modal-content" id="guestCheckoutModalContent">
+        <span class="close" onclick="closeGuestCheckoutModal()">&times;</span>
+        <h2>Bạn chưa đăng nhập</h2>
+        <p>Bạn có muốn đăng nhập để lưu đơn hàng vào tài khoản?</p>
+        <div style="margin-top: 18px;">
+            <button onclick="showLoginFormInModal()">Đăng nhập</button>
+            <button onclick="proceedCheckoutAsGuest()">Tiếp tục thanh toán không cần đăng nhập</button>
+        </div>
+    </div>
+</div>
+
+
+<%--<!-- Chat Icon -->--%>
+<%--<div id="chat-icon" onclick="toggleChatBox()">--%>
+<%--    <i class="fa-solid fa-comments"></i>--%>
+<%--</div>--%>
+
+<!-- Chat Box -->
+<%--<div id="chat-box">--%>
+<%--    <div id="chat-header">--%>
+<%--        Hỗ trợ trực tuyến--%>
+<%--        <span id="close-chat" onclick="toggleChatBox()">&times;</span>--%>
+<%--    </div>--%>
+<%--    <div id="chat-messages"></div>--%>
+<%--    <div style="display: flex; align-items: center;">--%>
+<%--        <input id="chat-input" type="text" placeholder="Nhập tin nhắn..." onkeydown="if(event.key==='Enter') sendMessage()" />--%>
+<%--        <button onclick="sendMessage()">Gửi</button>--%>
+<%--    </div>--%>
+<%--</div>--%>
+
+
 <script>
+    // function toggleChatBox() {
+    //     const chatBox = document.getElementById('chat-box');
+    //     const chatIcon = document.getElementById('chat-icon');
+    //     if (chatBox.style.display === 'flex') {
+    //         chatBox.style.display = 'none';
+    //         chatIcon.style.display = 'flex';
+    //     } else {
+    //         chatBox.style.display = 'flex';
+    //         chatIcon.style.display = 'none';
+    //     }
+    // }
+    //
+    // function sendMessage() {
+    //     const input = document.getElementById('chat-input');
+    //     const messages = document.getElementById('chat-messages');
+    //     if (input.value.trim() !== '') {
+    //         const msgDiv = document.createElement('div');
+    //         msgDiv.textContent = 'Bạn: ' + input.value;
+    //         messages.appendChild(msgDiv);
+    //         messages.scrollTop = messages.scrollHeight;
+    //         // TODO: Gửi message qua WebSocket tới backend nếu muốn realtime
+    //         input.value = '';
+    //     }
+    // }
+
+    function openSessionCartChoiceModal() {
+        document.getElementById('sessionCartChoiceModal').style.display = 'block';
+    }
+    function closeSessionCartChoiceModal() {
+        document.getElementById('sessionCartChoiceModal').style.display = 'none';
+    }
+    function proceedCheckoutWithSessionCart() {
+        window.location.href = 'checkout?useSessionCart=true';
+    }
+    function clearSessionCartAndStay() {
+        sessionStorage.removeItem('cart');
+        closeSessionCartChoiceModal();
+        if (typeof updateCartCount === 'function') updateCartCount();
+    }
+
+    function openGuestCheckoutModal() {
+        document.getElementById('guestCheckoutModal').style.display = 'block';
+    }
+    function closeGuestCheckoutModal() {
+        document.getElementById('guestCheckoutModal').style.display = 'none';
+        resetGuestCheckoutModal();
+    }
+    function showLoginFormInModal() {
+        const modalContent = document.getElementById('guestCheckoutModalContent');
+        modalContent.innerHTML = `
+        <span class="close" onclick="closeGuestCheckoutModal()">&times;</span>
+        <img src="images/logo.png" alt="Mam Mam Logo" class="modal-logo">
+        <h2>Đăng nhập để tiếp tục</h2>
+        <form id="modalLoginForm" style="margin-top:15px;">
+            <label>Username</label>
+            <input type="text" name="username" placeholder="Số điện thoại/ Gmail" required>
+            <label>Password</label>
+            <input type="password" name="password" required>
+            <button type="submit">Đăng nhập</button>
+        </form>
+        <p class="register">
+            Bạn chưa có tài khoản? <a href="register.jsp"><strong>Đăng ký ngay</strong></a>
+        </p>
+    `;
+        // Gắn sự kiện submit cho form đăng nhập trong modal
+        document.getElementById('modalLoginForm').onsubmit = async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const response = await fetch('login', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            if (data.success) {
+                localStorage.setItem('jwt', data.token);
+                closeGuestCheckoutModal();
+                const sessionCart = JSON.parse(sessionStorage.getItem('cart') || '[]');
+                if (sessionCart.length > 0) {
+                    sessionStorage.setItem('showSessionCartChoice', '1');
+                }
+                window.location.href = 'menu';
+            } else {
+                alert('Login failed: ' + (data.errorMessage || 'Unknown error'));
+            }
+        };
+    }
+    // Reset lại modal về nội dung gốc khi đóng
+    function resetGuestCheckoutModal() {
+        const modalContent = document.getElementById('guestCheckoutModalContent');
+        modalContent.innerHTML = `
+        <span class="close" onclick="closeGuestCheckoutModal()">&times;</span>
+        <h2>Bạn chưa đăng nhập</h2>
+        <p>Bạn có muốn đăng nhập để lưu đơn hàng vào tài khoản?</p>
+        <div style="margin-top: 18px;">
+          <button onclick="showLoginFormInModal()">Đăng nhập</button>
+          <button onclick="proceedCheckoutAsGuest()">Tiếp tục thanh toán không cần đăng nhập</button>
+        </div>
+    `;
+    }
+    // Thanh toán với tư cách khách (không đăng nhập)
+    function proceedCheckoutAsGuest() {
+        window.location.href = 'checkout?guest=true';
+    }
+
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (sessionStorage.getItem('showSessionCartChoice') === '1') {
+            sessionStorage.removeItem('showSessionCartChoice');
+            openSessionCartChoiceModal();
+        }
+        const checkoutBtn = document.getElementById('checkout-btn');
+        if (checkoutBtn) {
+            checkoutBtn.onclick = function(e) {
+                e.preventDefault();
+                const jwt = localStorage.getItem('jwt');
+                if (!isJwtValid(jwt)) {
+                    openGuestCheckoutModal();
+                } else {
+                    const sessionCart = JSON.parse(sessionStorage.getItem('cart') || '[]');
+                    if (sessionCart.length > 0) {
+                        showCartChoiceModal();
+                    } else {
+                        window.location.href = 'checkout';
+                    }
+                }
+            }
+        }
+    });
+
+
+
+
+
 
 
 </script>

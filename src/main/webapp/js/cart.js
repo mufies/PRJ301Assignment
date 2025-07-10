@@ -107,7 +107,17 @@ document.querySelector('#loginModal form').onsubmit = async function(e) {
         localStorage.setItem('jwt', data.token);
         if( data.isAdmin) {
             window.location.href = 'ayxkix';
-        } else {
+
+        }
+        else if (data.isEmployee) {
+            window.location.href = 'employeeMsg.jsp';
+        }
+        else {
+            const sessionCart = JSON.parse(sessionStorage.getItem('cart') || '[]');
+            if (sessionCart.length > 0) {
+                // Đánh dấu để menu.jsp biết cần hiện modal hỏi
+                sessionStorage.setItem('showSessionCartChoice', '1');
+            }
             window.location.href = 'menu';
         }
     } else {
@@ -178,3 +188,4 @@ function removeFromCartServer(productId) {
         updateCartCount();
     }
 }
+

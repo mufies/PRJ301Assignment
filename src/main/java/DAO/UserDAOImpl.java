@@ -283,6 +283,33 @@ public class UserDAOImpl {
         return false;
     }
 
+    public Employee loginEmployee(String username, String password) {
+        String sql = "SELECT * FROM Employee WHERE username = ? AND password = ?";
+        try (Dbconnect db = new Dbconnect();
+             Connection con = db.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, username);
+            ps.setString(2, password);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                Employee employee = new Employee();
+                employee.setEmployeeId(rs.getInt("employee_id"));
+                employee.setUsername(rs.getString("username"));
+                employee.setPassword(rs.getString("password"));
+                employee.setFullName(rs.getString("full_name"));
+                employee.setEmail(rs.getString("email"));
+                employee.setPhone(rs.getString("phone"));
+                return employee;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
 
 

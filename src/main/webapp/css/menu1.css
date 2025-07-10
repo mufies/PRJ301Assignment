@@ -179,3 +179,111 @@ footer {
 .logo-footer img {
     width: 80px;
 }
+
+
+
+/* Chat Icon - nổi phía trên icon giỏ hàng */
+#chat-icon {
+    position: fixed;
+    bottom: 105px; /* Lớn hơn .cart-icon.bottom (30px) + .cart-icon.height (60px) + khoảng cách 15px */
+    right: 30px;
+    background: #007bff;
+    color: #fff;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    z-index: 10001; /* Cao hơn cart-icon */
+    transition: background 0.2s;
+}
+#chat-icon:hover {
+    background: #0056b3;
+}
+
+/* Chat Box - nổi trên icon chat và icon giỏ hàng */
+#chat-box {
+    position: fixed;
+    bottom: 175px; /* Lớn hơn #chat-icon.bottom (105px) + #chat-icon.height (56px) + khoảng cách 14px */
+    right: 30px;
+    width: 340px;
+    max-width: 92vw;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    display: none;
+    flex-direction: column;
+    z-index: 10002; /* Cao hơn cả chat-icon và cart-icon */
+    overflow: hidden;
+    animation: chatbox-fadein 0.25s;
+}
+
+@keyframes chatbox-fadein {
+    from { opacity: 0; transform: translateY(30px);}
+    to { opacity: 1; transform: translateY(0);}
+}
+
+#chat-header {
+    background: #007bff;
+    color: #fff;
+    padding: 14px 18px;
+    border-top-left-radius: 14px;
+    border-top-right-radius: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    font-size: 17px;
+}
+
+#close-chat {
+    cursor: pointer;
+    font-size: 22px;
+    font-weight: bold;
+    transition: color 0.2s;
+}
+#close-chat:hover {
+    color: #ff4d4f;
+}
+
+#chat-messages {
+    padding: 15px 18px;
+    height: 220px;
+    overflow-y: auto;
+    background: #f9f9f9;
+    font-size: 15px;
+    color: #222;
+}
+
+#chat-input {
+    flex: 1;
+    padding: 9px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin: 12px 0 12px 18px;
+    font-size: 15px;
+    outline: none;
+}
+
+#chat-box button {
+    margin-bottom: 12px;
+    margin-left: 10px;
+    padding: 9px 16px;
+    background: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background 0.2s;
+}
+#chat-box button:hover {
+    background: #0056b3;
+}
+
+
+

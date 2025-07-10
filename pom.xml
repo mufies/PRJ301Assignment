@@ -104,6 +104,16 @@
       <version>20250107</version>
     </dependency>
 
+    <dependency>
+      <groupId>javax.websocket</groupId>
+      <artifactId>javax.websocket-api</artifactId>
+      <version>1.1</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Thêm dependency cho database nếu cần (MySQL, MongoDB, v.v.) -->
+
+
   </dependencies>
   <build>
     <finalName>PRJ301</finalName>

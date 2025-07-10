@@ -30,7 +30,6 @@
         </section>
 
 
-        <c:set var="test" value="JSTL is working!" />
 
         <section class = "about">
             <h2>About Us / 저희소개</h2>
@@ -196,7 +195,11 @@
                 localStorage.setItem('jwt', data.token);
                 if( data.isAdmin) {
                     window.location.href = 'ayxkix';
-                } else {
+                }
+                else if (data.isEmployee) {
+                    window.location.href = 'employeeMsg';
+                }
+                else {
                     window.location.href = 'menu';
                 }
             } else {
