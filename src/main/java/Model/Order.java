@@ -5,12 +5,14 @@ import java.util.List;
 public class Order {
     private int orderId;
     private String customerName;
+    private String username;
     private String orderDate;
     private long totalAmount;
     private String status;
     private String description;
     private List<OrderItem> details;
     private boolean isLoggedIn;
+    private String shippingCode;
 
     public Order(int orderId, String customerName, String orderDate, long totalAmount, String status, String description) {
         this.orderId = orderId;
@@ -22,6 +24,22 @@ public class Order {
     }
 
     public Order() {
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getShippingCode() {
+        return shippingCode;
+    }
+
+    public void setShippingCode(String shippingCode) {
+        this.shippingCode = shippingCode;
     }
 
     public int getOrderId() {

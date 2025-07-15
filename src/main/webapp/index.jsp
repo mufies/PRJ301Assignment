@@ -22,7 +22,7 @@
         <section class ="highlight">
             <h1>Enjoy Delicious <br><span>The <span class="highlight_text">Korean Foods</span></span></h1>
             <p>We serve authentic Korean dishes, prepared with fresh ingredients by skilled chefs for a truly traditional taste.</p>
-            <a href="#" class="order-btn">Order Now</a>
+            <a href="menu" class="order-btn">Order Now</a>
         </section>
 
         <section class = "banner">
@@ -76,7 +76,7 @@
                 </div>
             </div>
             <div class="view-all">
-                <a href="#" class="order-btn">View All Menu</a>
+                <a href="menu" class="order-btn">View All Menu</a>
             </div>
 
         </section>
@@ -114,121 +114,92 @@
             </div>
         </footer>
         <!-- Login Modal (ẩn ban đầu) -->
-    <div id="loginModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span class="close" onclick="closeLoginModal()">&times;</span>
+        <!-- LOGIN MODAL -->
+        <div id="loginModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeLoginModal()">&times;</span>
+                <img src="images/logo.png" alt="Mam Mam Logo" class="modal-logo">
+                <h1 class="modal-title">MĂM MĂM</h1>
+                <h2 class="modal-subtitle">VUI LÒNG ĐĂNG NHẬP</h2>
+
+                <form action="login" method="post">
+                    <label>Username</label>
+                    <input type="text" name="username" placeholder="Username" required>
+
+                    <label>Password</label>
+                    <input type="password" name="password" required>
+
+
+
+                    <button type="submit">Đăng nhập</button>
+                    <div class="forgot">
+                        <button type="button" class="forgot-btn" onclick="closeLoginModal(); openForgotPassword()">Quên mật khẩu?</button>
+                    </div>
+                </form>
+
+                <p class="register">
+                    Bạn chưa có tài khoản? <a href="register"><strong>Đăng ký ngay</strong></a>
+                </p>
+            </div>
+        </div>
+
+        <!-- FORGOT PASSWORD MODAL -->
+        <div id="forgotPasswordModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeForgotPassword()">&times;</span>
+                <h2 class="modal-subtitle">KHÔI PHỤC MẬT KHẨU</h2>
+                <form action="forgotpassword" method="post">
+                    <label for="email">Nhập email của bạn:</label>
+                    <input type="email" id="email" name="email" required>
+                    <button type="submit">Gửi mã xác nhận</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ENTER CODE MODAL -->
+        <div id="enterForgotPasswordModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeForgotPassword()">&times;</span>
+                <h2 class="modal-subtitle">XÁC NHẬN MÃ & ĐẶT LẠI MẬT KHẨU</h2>
+                <form action="ChangePassword" method="post">
+                    <label for="code">Nhập mã xác nhận:</label>
+                    <input type="text" id="code" name="code" required>
+
+                    <label for="newPassword">Nhập mật khẩu mới:</label>
+                    <input type="password" id="newPassword" name="new_password" required>
+
+                    <label for="confirmPassword">Nhập lại mật khẩu mới:</label>
+                    <input type="password" id="confirmPassword" name="confirm_password" required>
+
+                    <button type="submit">Xác nhận</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="loggedModal" class="modal">
+            <div class="modal-content">
+            <span class="close" onclick="closeLoggedModal()">&times;</span>
             <img src="images/logo.png" alt="Mam Mam Logo" class="modal-logo">
-            <h1 class="modal-title">MĂM MĂM</h1>
-            <h2 class="modal-subtitle">VUI LÒNG ĐĂNG NHẬP</h2>
-
-            <form action="login" method="post">
-                <label>Username</label>
-                <input type="text" name="username" placeholder="Số điện thoại/ Gmail" required>
-
-                <label>Password</label>
-                <input type="password" name="password" required>
-
-<%--                <div class="forgot">--%>
-<%--                    <button type="button" class="forgot-btn" onclick="closeLoginModal();openForgotPassword()">Quên mật khẩu?</button>--%>
-<%--                </div>--%>
-
-                <button type="submit">Submit</button>
-            </form>
-
-            <p class="register">
-                Bạn chưa có tài khoản? <a href="register.jsp"><strong>Đăng ký ngay</strong></a>
-            </p>
+            <h2 class="modal-subtitle">TÀI KHOẢN CỦA BẠN</h2>
+            <div class="user-options" style="justify-content: center; align-items: center;">
+                <button class="option-btn" onclick="window.location.href='settings.jsp'" style="justify-content: center; align-items: center;">
+                    <i class="fa-solid fa-gear"></i>
+                    Cài đặt tài khoản
+                </button>
+                <button class="option-btn" onclick="window.location.href='history.jsp'" style="justify-content: center; align-items: center;">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    Lịch sử mua hàng
+                </button>
+                <button class="option-btn logout-btn" onclick="logout()" style="justify-content: center; align-items: center;">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Đăng xuất
+                </button>
+            </div>
         </div>
-    </div>
-        <div id="forgotPasswordModal" style="display: none;">
-            <form action="forgotpassword" method="post">
-                <label for="email">Nhập email của bạn:</label><br>
-                <input type="email" id="email" name="email" required /><br><br>
-                <button type="submit">Gửi mã xác nhận</button>
-            </form>
-            <button onclick="closeForgotPassword()">Đóng</button>
-        </div>
-        <div id="enterForgotPasswordModal" style="display: none;">
-            <form action="enterforgotpassword" method="post">
-                <label for="code">Nhập mã xác nhận:</label><br>
-                <input type="text" id="code" name="code" required /><br><br>
-                <label for="newPassword">Nhập mật khẩu mới:</label><br>
-                <input type="password" id="newPassword" name="newPassword" required /><br><br>
-                <button type="submit">Xác nhận</button>
-            </form>
-            <button onclick="closeForgotPassword()">Đóng</button>
         </div>
 
-    <!-- JavaScript mở/đóng modal -->
-    <script>
-        function openLoginModal() {
-            document.getElementById('loginModal').style.display = 'block';
-        }
 
-        function closeLoginModal() {
-            document.getElementById('loginModal').style.display = 'none';
-        }
-        function openForgotPassword() {
-            document.getElementById('forgotPasswordModal').style.display = 'block';
-        }
-        function closeForgotPassword() {
-            document.getElementById('forgotPasswordModal').style.display = 'none';
-        }
-
-
-
-        window.onclick = function(event) {
-            const modal = document.getElementById('loginModal');
-            if (event.target === modal) {
-                closeLoginModal();
-            }
-        }
-        document.querySelector('#loginModal form').onsubmit = async function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            const response = await fetch('login', {
-                method: 'POST',
-                body: formData
-            });
-            const data = await response.json();
-            if (data.success) {
-                localStorage.setItem('jwt', data.token);
-                if( data.isAdmin) {
-                    window.location.href = 'ayxkix';
-                }
-                else if (data.isEmployee) {
-                    window.location.href = 'employeeMsg';
-                }
-                else {
-                    window.location.href = 'menu';
-                }
-            } else {
-                alert('Login failed: ' + (data.errorMessage || 'Unknown error'));
-            }
-        };
-
-        function isJwtValid(token) {
-            if (!token) return false;
-            try {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                return !payload.exp || (Date.now() / 1000 < payload.exp);
-            } catch (e) {
-                return false;
-            }
-        }
-
-        window.onload = function() {
-            const jwt = localStorage.getItem('jwt');
-            if (isJwtValid(jwt)) {
-                const loginBtn = document.querySelector('.login-btn');
-                if (loginBtn) {
-                    loginBtn.innerHTML = '<i class="fa-solid fa-user" style="font-size: 15px"></i>';
-                    }
-            }
-
-        };
-    </script>
-
+<script src="js/loginUtils.js"></script>
 
     </body>
 </html>

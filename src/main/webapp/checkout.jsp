@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <title>Thanh Toán - Mam Mam</title>
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/login.css">
     <link rel="stylesheet" href="css/menu1.css">
     <link rel="stylesheet" href="css/checkout.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -164,7 +163,7 @@
     </div>
 </div>
 
-<div id="successModal" class="modal" style="display:none;">
+<div id="successModal" class="modal" >
     <div class="modal-content">
         <span class="close" onclick="closeSuccessModal()">&times;</span>
         <h2>Đặt hàng thành công!</h2>

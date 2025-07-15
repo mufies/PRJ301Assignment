@@ -1,0 +1,77 @@
+/* Giao diện tổng thể */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #fffaf0; /* nền kem nhạt */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px;
+    color: #333;
+}
+
+/* Tiêu đề */
+h2 {
+    color: #b22222;
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+/* Form */
+label {
+    font-weight: 600;
+    margin-top: 15px;
+    margin-bottom: 6px;
+    font-size: 16px;
+    display: block;
+    color: #333;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    width: 320px;
+    padding: 10px 14px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 15px;
+    box-sizing: border-box;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    background-color: #fff;
+}
+
+input:focus {
+    border-color: #b22222;
+    box-shadow: 0 0 5px rgba(178, 34, 34, 0.3);
+    outline: none;
+}
+
+/* Nút lưu */
+button {
+    margin-top: 30px;
+    padding: 12px 28px;
+    background-color: #b22222;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+button:hover {
+    background-color: #8b0000;
+    transform: translateY(-2px);
+}
+
+/* Thông báo */
+#status-message {
+    margin-top: 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: green;
+    text-align: center;
+}

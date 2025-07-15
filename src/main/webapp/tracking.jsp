@@ -5,7 +5,6 @@
   <meta charset="UTF-8">
   <title>Tra cứu vận đơn - Mam Mam</title>
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/login.css">
   <link rel="stylesheet" href="css/menu1.css">
   <link rel="stylesheet" href="css/checkout.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -93,7 +92,7 @@
 </div>
 
 <!-- Modal hiển thị thông tin đơn hàng -->
-<div id="orderInfoModal" class="modal" style="display:none;">
+<div id="orderInfoModal" class="modal" >
   <div class="modal-content">
     <span class="close" onclick="closeOrderInfoModal()">&times;</span>
     <h2>Thông tin đơn hàng</h2>

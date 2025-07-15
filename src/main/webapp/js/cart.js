@@ -110,7 +110,7 @@ document.querySelector('#loginModal form').onsubmit = async function(e) {
 
         }
         else if (data.isEmployee) {
-            window.location.href = 'employeeMsg.jsp';
+            window.location.href = 'updateOrderStatus';
         }
         else {
             const sessionCart = JSON.parse(sessionStorage.getItem('cart') || '[]');

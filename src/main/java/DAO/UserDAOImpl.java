@@ -11,12 +11,15 @@ import java.util.Set;
 
 public class UserDAOImpl {
 
-    public boolean registerUser(String username, String password) {
-        if (username == null || username.length() <= 5 || password == null || password.length() <= 8) {
-            return false;
+    public RegisterResult registerUser(String username, String password, String email, String phone, String address, String fullName) {
+        if (username == null || username.length() <= 5) {
+            return new RegisterResult(false, "Tên đăng nhập phải lớn hơn 5 ký tự.");
+        }
+        if (password == null || password.length() <= 8) {
+            return new RegisterResult(false, "Mật khẩu phải lớn hơn 8 ký tự.");
         }
 
-        String checkSql = "select * from Users where username = ?";
+        String checkSql = "SELECT * FROM Users WHERE username = ?";
         try (Dbconnect db = new Dbconnect();
              java.sql.Connection con = db.getConnection();
              java.sql.PreparedStatement checkPs = con.prepareStatement(checkSql)) {
@@ -25,31 +28,56 @@ public class UserDAOImpl {
             java.sql.ResultSet rs = checkPs.executeQuery();
 
             if (rs.next()) {
-                return false;
+                return new RegisterResult(false, "Tên đăng nhập đã tồn tại.");
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return new RegisterResult(false, "Lỗi hệ thống khi kiểm tra tên đăng nhập.");
         }
 
-
-        String sql = "insert into Users values (?,?)";
+        String sql = "INSERT INTO Users (username, password, full_name, email, phone, address) VALUES (?,?,?,?,?,?)";
         try (Dbconnect db = new Dbconnect();
              java.sql.Connection con = db.getConnection();
              java.sql.PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, username);
             ps.setString(2, password);
+            ps.setString(3, fullName);
+            ps.setString(4, email);
+            ps.setString(5, phone);
+            ps.setString(6, address);
             int rowsAffected = ps.executeUpdate();
-            return rowsAffected > 0;
+            if (rowsAffected > 0) {
+                return new RegisterResult(true, "Đăng ký thành công.");
+            } else {
+                return new RegisterResult(false, "Không thể đăng ký tài khoản.");
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
+            return new RegisterResult(false, "Lỗi hệ thống khi đăng ký.");
+        }
+    }
+    public class RegisterResult {
+        private boolean success;
+        private String message;
+
+        public RegisterResult(boolean success, String message) {
+            this.success = success;
+            this.message = message;
         }
 
-        return false;
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public String getMessage() {
+            return message;
+        }
     }
+
+
 
     public User loginUser(String username, String password) {
         String sql = "select * from Users where username = ? and password = ?";
@@ -283,6 +311,29 @@ public class UserDAOImpl {
         return false;
     }
 
+    public boolean updateUser(String username, String fullName, String email, String phone, String address, String password) {
+        String sql = "UPDATE Users SET full_name = ?, email = ?, phone = ?, address = ?, password = ? WHERE username = ?";
+        try (Dbconnect db = new Dbconnect();
+             java.sql.Connection con = db.getConnection();
+             java.sql.PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, fullName);
+            ps.setString(2, email);
+            ps.setString(3, phone);
+            ps.setString(4, address);
+            ps.setString(5, password);
+            ps.setString(6, username);
+
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+
     public Employee loginEmployee(String username, String password) {
         String sql = "SELECT * FROM Employee WHERE username = ? AND password = ?";
         try (Dbconnect db = new Dbconnect();
@@ -304,6 +355,34 @@ public class UserDAOImpl {
                 return employee;
             }
 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public User getUserByUsername(String username) {
+        String sql = "SELECT username, password, full_name, email, phone, address FROM Users WHERE username = ?";
+
+        try (Dbconnect db = new Dbconnect();
+             java.sql.Connection con = db.getConnection();
+             java.sql.PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, username);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                User user = new User();
+                user.setUsername(rs.getString("username"));
+                user.setPassword(rs.getString("password"));
+                user.setFullName(rs.getString("full_name"));
+                user.setEmail(rs.getString("email"));
+                user.setPhoneNumber(rs.getString("phone"));
+                user.setAddress(rs.getString("address"));
+                return user;
+            } else {
+                System.out.println("Không có dữ liệu cho username: " + username);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
