@@ -1,5 +1,5 @@
 // ===== THAY ĐỔI API KEY TẠI ĐÂY =====
-const API_KEY = "AIzaSyAv8wJRdkz2koc4XrU2vMWJokZgOtpAivo"; // Thay bằng Generative Language API key của bạn
+const API_KEY = ""; // Thay bằng Generative Language API key của bạn
 // ====================================
 
 let isInitialized = false;
