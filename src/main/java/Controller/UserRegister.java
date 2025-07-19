@@ -23,6 +23,7 @@ public class UserRegister extends HttpServlet {
         rd.forward(request, response);
     }
 
+    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String username = request.getParameter("username");
