@@ -12,34 +12,65 @@ import java.util.Set;
 public class UserDAOImpl {
 
     public RegisterResult registerUser(String username, String password, String email, String phone, String address, String fullName) {
+
+        // ==== VALIDATION CƠ BẢN ====
         if (username == null || username.length() <= 5) {
-            return new RegisterResult(false, "Tên đăng nhập phải lớn hơn 5 ký tự.");
+            return new RegisterResult(false, "❌ Tên đăng nhập phải có ít nhất 6 ký tự.");
         }
         if (password == null || password.length() <= 8) {
-            return new RegisterResult(false, "Mật khẩu phải lớn hơn 8 ký tự.");
+            return new RegisterResult(false, "❌ Mật khẩu phải có ít nhất 9 ký tự.");
+        }
+        if (fullName == null || fullName.trim().isEmpty()) {
+            return new RegisterResult(false, "❌ Họ tên không được để trống.");
         }
 
-        String checkSql = "SELECT * FROM Users WHERE username = ?";
+        // ==== VALIDATION EMAIL ====
+        String emailRegex = "^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$";
+        if (email == null || !email.matches(emailRegex)) {
+            return new RegisterResult(false, "❌ Email không hợp lệ.");
+        }
+
+        String phoneRegex = "^\\d{10,11}$";
+        if (phone == null || !phone.matches(phoneRegex)) {
+            return new RegisterResult(false, "❌ Số điện thoại không hợp lệ (10-11 chữ số).");
+        }
+
+        String checkSql = "SELECT username, email, phone FROM Users WHERE username = ? OR email = ? OR phone = ?";
         try (Dbconnect db = new Dbconnect();
-             java.sql.Connection con = db.getConnection();
-             java.sql.PreparedStatement checkPs = con.prepareStatement(checkSql)) {
+             Connection con = db.getConnection();
+             PreparedStatement checkPs = con.prepareStatement(checkSql)) {
 
             checkPs.setString(1, username);
-            java.sql.ResultSet rs = checkPs.executeQuery();
+            checkPs.setString(2, email);
+            checkPs.setString(3, phone);
 
-            if (rs.next()) {
-                return new RegisterResult(false, "Tên đăng nhập đã tồn tại.");
+            ResultSet rs = checkPs.executeQuery();
+            while (rs.next()) {
+                String existingUsername = rs.getString("username");
+                String existingEmail = rs.getString("email");
+                String existingPhone = rs.getString("phone");
+
+                if (username.equals(existingUsername)) {
+                    return new RegisterResult(false, "❌ Tên đăng nhập đã tồn tại.");
+                }
+                if (email.equals(existingEmail)) {
+                    return new RegisterResult(false, "❌ Email đã được sử dụng.");
+                }
+                if (phone.equals(existingPhone)) {
+                    return new RegisterResult(false, "❌ Số điện thoại đã được sử dụng.");
+                }
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            return new RegisterResult(false, "Lỗi hệ thống khi kiểm tra tên đăng nhập.");
+            return new RegisterResult(false, "❌ Lỗi hệ thống khi kiểm tra tài khoản: " + e.getMessage());
         }
 
-        String sql = "INSERT INTO Users (username, password, full_name, email, phone, address) VALUES (?,?,?,?,?,?)";
+        // ==== THỰC HIỆN ĐĂNG KÝ ====
+        String insertSql = "INSERT INTO Users (username, password, full_name, email, phone, address) VALUES (?, ?, ?, ?, ?, ?)";
         try (Dbconnect db = new Dbconnect();
-             java.sql.Connection con = db.getConnection();
-             java.sql.PreparedStatement ps = con.prepareStatement(sql)) {
+             Connection con = db.getConnection();
+             PreparedStatement ps = con.prepareStatement(insertSql)) {
 
             ps.setString(1, username);
             ps.setString(2, password);
@@ -47,18 +78,20 @@ public class UserDAOImpl {
             ps.setString(4, email);
             ps.setString(5, phone);
             ps.setString(6, address);
+
             int rowsAffected = ps.executeUpdate();
             if (rowsAffected > 0) {
-                return new RegisterResult(true, "Đăng ký thành công.");
+                return new RegisterResult(true, "✅ Đăng ký thành công.");
             } else {
-                return new RegisterResult(false, "Không thể đăng ký tài khoản.");
+                return new RegisterResult(false, "❌ Không thể đăng ký tài khoản. Vui lòng thử lại.");
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            return new RegisterResult(false, "Lỗi hệ thống khi đăng ký.");
+            return new RegisterResult(false, "❌ Lỗi hệ thống khi đăng ký: " + e.getMessage());
         }
     }
+
     public class RegisterResult {
         private boolean success;
         private String message;

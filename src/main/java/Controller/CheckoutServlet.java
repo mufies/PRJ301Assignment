@@ -117,7 +117,15 @@ public class CheckoutServlet extends HttpServlet {
                 JSONArray items = jsonRequest.getJSONArray("items");
                 String guestName = jsonRequest.getString("name");
                 String guestPhone = jsonRequest.getString("phone");
+
+                String phoneRegex = "^\\d{10,11}$";
+                if (!guestPhone.matches(phoneRegex)) {
+                    throw new Exception("❌ Số điện thoại không hợp lệ.");
+                }
                 String guestAddress = jsonRequest.getString("address");
+                if (guestAddress.isEmpty() || guestAddress.length() < 5) {
+                    throw new Exception("❌ Vui lòng nhập địa chỉ giao hàng hợp lệ.");
+                }
                 String description = jsonRequest.optString("description", "");
 
                 int totalAmount = 0;

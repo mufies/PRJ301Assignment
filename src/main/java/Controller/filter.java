@@ -53,7 +53,7 @@ public class filter implements Filter {
         String url = httpServletRequest.getServletPath();
 
         // ✅ FIX: Chặn truy cập trực tiếp file .jsp, .html, .js
-        if (url.endsWith(".jsp") || url.endsWith(".html") || url.endsWith(".js")) {
+        if (url.endsWith(".jsp") ) {
             httpServletResponse.sendRedirect("home");
             return;
         }

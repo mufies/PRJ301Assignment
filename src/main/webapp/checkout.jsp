@@ -62,8 +62,19 @@
                 </div>
                 <div class="form-group">
                     <label for="customerPhone">Số điện thoại</label>
-                    <input type="tel" id="customerPhone" name="customerPhone" required>
+                    <input type="tel"
+                           id="customerPhone"
+                           name="customerPhone"
+                           placeholder="Nhập số điện thoại (VD: 0901234567)"
+                           pattern="^(0[0-9]{9}|\+84[0-9]{9})$"
+                           title="Số điện thoại phải bắt đầu bằng 0 hoặc +84 và có đúng 10 chữ số"
+                           maxlength="12"
+                           minlength="10"
+                           oninput="this.value = this.value.replace(/[^0-9+]/g, '')"
+                           required>
+                    <span class="error-message" id="phoneError"></span>
                 </div>
+
                 <div class="form-group">
                     <label for="customerAddress">Địa chỉ giao hàng</label>
                     <textarea id="customerAddress" name="customerAddress" required></textarea>
