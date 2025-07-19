@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="css/login.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
-        /* Modal CSS */
+        /* Modal CSS - giữ nguyên */
         #orderDetailsModal {
             display: none;
             position: fixed;
@@ -33,36 +33,94 @@
         #orderDetailsModal li { margin-bottom: 8px; }
     </style>
 </head>
+<body>
 <script>
-    function logout()
-    {
+    // ✅ Sửa function logout
+    function logout() {
         localStorage.removeItem('jwt');
-        window.location.href = 'home';
+        window.location.href = '<%=request.getContextPath()%>/home'; // ✅ Thêm context path
     }
-    const token = localStorage.getItem('jwt');
-    if (!isJwtValid(token)) {
-        window.location.replace('<%=request.getContextPath()%>/menu');
-    } else {
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            if (payload.role !== 'Employee') {
-                window.location.replace('<%=request.getContextPath()%>/menu');
-            }
-        } catch (e) {
-            window.location.replace('<%=request.getContextPath()%>/menu');
-        }
-    }
-    function isJwtValid(token) {
+
+    // ✅ Định nghĩa functions trước
+    async function isJwtValid(token) {
         if (!token) return false;
         try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            return !payload.exp || (Date.now() / 1000 < payload.exp);
+            const requestData = { isJwtValid: token };
+            const response = await fetch('JwtServlet', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data.isJwtValid === true;
         } catch (e) {
+            console.error("❌ Lỗi khi kiểm tra JWT:", e);
             return false;
         }
     }
+
+    async function getRoleFromJwt(token) {
+        if (!token) return null;
+
+        try {
+            const requestData = { getRole: token };
+            const response = await fetch('JwtServlet', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (data.error) {
+                console.error('Error getting role from JWT:', data.error);
+                return null;
+            }
+
+            return data.getRole;
+
+        } catch (error) {
+            console.error('Error calling JwtServlet:', error);
+            return null;
+        }
+    }
+
+    // ✅ Wrap authentication check trong async IIFE
+    (async function() {
+        const token = localStorage.getItem('jwt');
+
+        if (!(await isJwtValid(token))) {
+            alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+            window.location.replace('<%=request.getContextPath()%>/menu');
+            return;
+        }
+
+        try {
+            const role = await getRoleFromJwt(token);
+            if (role !== 'Employee') {
+                alert('Bạn không có quyền truy cập trang này.');
+                window.location.replace('<%=request.getContextPath()%>/menu');
+                return;
+            }
+        } catch (e) {
+            console.error('Error checking role:', e);
+            window.location.replace('<%=request.getContextPath()%>/menu');
+        }
+    })();
+
 </script>
-<body>
+
 <header>
     <div class="logo">
         <a href="updateOrderStatus"> <img src="images/logo.png" alt="Mam Mam Logo"></a>
@@ -72,10 +130,9 @@
         <a href="employeeCheckingOrder">Create Order</a>
         <a href="updateEmployee">Update Info</a>
         <a href="#" onclick="logout()">Logout</a>
-
-
     </nav>
 </header>
+
 <h2>Đơn hàng đang chờ xử lý</h2>
 <table id="orderTable">
     <thead>

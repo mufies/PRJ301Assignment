@@ -37,7 +37,6 @@ public class GetUserOrdersServlet extends HttpServlet {
         JSONArray orderJson = new JSONArray();
 
         try {
-            // Đọc dữ liệu từ body
             StringBuilder sb = new StringBuilder();
             String line;
             try (BufferedReader reader = request.getReader()) {

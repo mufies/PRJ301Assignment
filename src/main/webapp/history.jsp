@@ -85,7 +85,6 @@
     </style>
 
 </head>
-<script src="js/update.js"></script>
 
 <body>
 <header>
@@ -129,23 +128,12 @@
         </div>
     </div>
 </div>
+<script src="js/update.js"></script>
+
 <script>
     const contextPath = "${pageContext.request.contextPath}";
-
-    function isJwtValid(token) {
-        if (!token) return false;
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            return !payload.exp || (Date.now() / 1000 < payload.exp);
-        } catch (e) {
-            return false;
-        }
-    }
-
-
-
-
     window.addEventListener('DOMContentLoaded', loadOrderHistory);
 </script>
+
 </body>
 </html>

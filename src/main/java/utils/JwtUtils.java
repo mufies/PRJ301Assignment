@@ -42,7 +42,7 @@ public class JwtUtils {
     }
 
     public static String generateToken(String username,String role) {
-        return (Jwts.builder()
+        return encrypt(Jwts.builder()
                 .setSubject(username)
                 .claim("role", role)
                 .setIssuedAt(new Date())
@@ -56,7 +56,7 @@ public class JwtUtils {
         String subject = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
-                .parseClaimsJws(token)
+                .parseClaimsJws(decrypt(token))
                 .getBody()
                 .getSubject();
         return subject.equals(username);
@@ -65,11 +65,11 @@ public class JwtUtils {
         if (token1 == null || token1.trim().isEmpty()) {
             return null;
         }
-//        String token = decrypt(token1);
+        String token = decrypt(token1);
         return Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
-                .parseClaimsJws(token1)
+                .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
     }
@@ -80,8 +80,7 @@ public class JwtUtils {
                 return null;
             }
 
-//            String decryptedToken = decrypt(token);
-            String decryptedToken = token; // Assuming the token is already in the correct format
+            String decryptedToken = decrypt(token); // Decrypt before parsing
             return Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()
@@ -90,15 +89,12 @@ public class JwtUtils {
                     .get("role", String.class);
 
         } catch (JwtException e) {
-            // Token không hợp lệ, expired, hoặc signature sai
             System.err.println("JWT Error: " + e.getMessage());
             return null;
         } catch (IllegalArgumentException e) {
-            // Token format không đúng
             System.err.println("Invalid token format: " + e.getMessage());
             return null;
         } catch (Exception e) {
-            // Lỗi decrypt hoặc lỗi khác
             System.err.println("Error getting role from token: " + e.getMessage());
             return null;
         }

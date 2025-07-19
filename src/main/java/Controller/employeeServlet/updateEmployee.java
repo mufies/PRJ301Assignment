@@ -1,4 +1,4 @@
-package Controller;
+package Controller.employeeServlet;
 
 import DAO.EmployeeDAOImpl;
 import Model.Employee;

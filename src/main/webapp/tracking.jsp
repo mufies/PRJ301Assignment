@@ -73,12 +73,11 @@
 <body>
 <header>
   <div class="logo">
-    <img src="images/logo.png" alt="Mam Mam Logo">
+    <a href="home"> <img src="images/logo.png" alt="Mam Mam Logo"> </a>
   </div>
   <nav>
     <a href="index.jsp">Home</a>
     <a href="menu">Menu</a>
-    <button class="login-btn" id="loginButton">Login</button>
   </nav>
 </header>
 

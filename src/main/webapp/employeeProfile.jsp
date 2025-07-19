@@ -91,35 +91,7 @@
         font-weight: bold;
     }
 </style>
-<script>
-    function logout()
-    {
-        localStorage.removeItem('jwt');
-        window.location.href = 'home';
-    }
-    const token = localStorage.getItem('jwt');
-    if (!isJwtValid(token)) {
-        window.location.replace('<%=request.getContextPath()%>/menu');
-    } else {
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            if (payload.role !== 'Employee') {
-                window.location.replace('<%=request.getContextPath()%>/menu');
-            }
-        } catch (e) {
-            window.location.replace('<%=request.getContextPath()%>/menu');
-        }
-    }
-    function isJwtValid(token) {
-        if (!token) return false;
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            return !payload.exp || (Date.now() / 1000 < payload.exp);
-        } catch (e) {
-            return false;
-        }
-    }
-</script>
+
 <body>
 <header>
     <div class="logo">
@@ -129,7 +101,7 @@
         <a href="updateOrderStatus">Dashboard</a>
         <a href="employeeCheckingOrder">Create Order</a>
         <a href="updateEmployee">Update Info</a>
-        <a href="#" onclick="logout()">Logout</a>
+        <a href="" onclick="logout()">Logout</a>
 
 
     </nav>
@@ -164,6 +136,80 @@
     </form>
 
 </div>
+<script>
+    function logout() {
+        localStorage.removeItem('jwt');
+        window.location.href = 'home';
+    }
+
+    // ✅ Định nghĩa functions trước
+    async function isJwtValid(token) {
+        if (!token) return false;
+        try {
+            const requestData = { isJwtValid: token };
+            const response = await fetch('JwtServlet', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data.isJwtValid === true;
+        } catch (e) {
+            console.error("❌ Lỗi khi kiểm tra JWT:", e);
+            return false;
+        }
+    }
+
+    async function getRoleFromJwt(token) {
+        if (!token) return null;
+        try {
+            const requestData = { getRole: token };
+            const response = await fetch('JwtServlet', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.getRole;
+        } catch (error) {
+            console.error('Error calling JwtServlet:', error);
+            return null;
+        }
+    }
+
+    // ✅ Wrap authentication check trong async IIFE
+    (async function() {
+        const token = localStorage.getItem('jwt');
+
+        if (!(await isJwtValid(token))) {
+            window.location.replace('<%=request.getContextPath()%>/home');
+            return;
+        }
+
+        try {
+            const role = await getRoleFromJwt(token);
+            if (role !== 'Employee') {
+                window.location.replace('<%=request.getContextPath()%>/home');
+                return;
+            }
+        } catch (e) {
+            console.error('Error checking role:', e);
+            window.location.replace('<%=request.getContextPath()%>/home');
+        }
+    })();
+</script>
 
 <script src="js/employeeProfile.js"></script>
 </body>

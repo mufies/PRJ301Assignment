@@ -12,10 +12,68 @@
     <link rel="stylesheet" href="css/search.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
+
     <script>
         const CONTEXT_PATH = "${pageContext.request.contextPath}";
-    </script>
-    <script>
+
+        // ✅ Thêm các function bị thiếu
+        function openLoginModal() {
+            document.getElementById('loginModal').classList.add('active');
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').classList.remove('active');
+        }
+
+        function openLoggedModal() {
+            document.getElementById('loggedModal').classList.add('active');
+        }
+
+        function closeLoggedModal() {
+            document.getElementById('loggedModal').classList.remove('active');
+        }
+
+        function openForgotPassword() {
+            document.getElementById('forgotPasswordModal').classList.add('active');
+        }
+
+        function closeForgotPassword() {
+            document.getElementById('forgotPasswordModal').classList.remove('active');
+            document.getElementById('enterForgotPasswordModal').classList.remove('active');
+        }
+
+        function logout() {
+            localStorage.removeItem('jwt');
+            sessionStorage.removeItem('cart');
+            const loginBtn = document.querySelector('.login-btn');
+            if (loginBtn) {
+                loginBtn.innerHTML = 'Login';
+                loginBtn.onclick = openLoginModal;
+            }
+            window.location.reload();
+        }
+
+        async function isJwtValid(token) {
+            if (!token) return false;
+            try {
+                const requestData = { isJwtValid: token };
+                const response = await fetch('JwtServlet', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                return data.isJwtValid;
+            } catch (e) {
+                return false;
+            }
+        }
+
         function filterMenu(type) {
             const items = document.querySelectorAll('.product-item');
             items.forEach(item => {
@@ -23,24 +81,33 @@
             });
 
             document.querySelectorAll('.category-list li').forEach(li => li.classList.remove('active'));
-            document.getElementById(type).classList.add('active');
+            const activeElement = document.getElementById(type);
+            if (activeElement) activeElement.classList.add('active'); // ✅ Thêm null check
         }
 
-        window.onload = function() {
-            document.getElementById("foodInput").addEventListener("keyup", function() {
-                fetchResults(function(food) {
-                    addToCart(food.id.toString(), food.name, food.img, food.price.toFixed(0).toString());
+        window.onload = async function() { // ✅ Thêm async
+            const foodInput = document.getElementById("foodInput");
+            if (foodInput) { // ✅ Thêm null check
+                foodInput.addEventListener("keyup", function() {
+                    if (typeof fetchResults === 'function') { // ✅ Thêm function check
+                        fetchResults(function(food) {
+                            if (typeof addToCart === 'function') { // ✅ Thêm function check
+                                addToCart(food.id.toString(), food.name, food.img, food.price.toFixed(0).toString());
+                            }
+                        });
+                    }
                 });
-            });
-            filterMenu('starter');
-            updateCartCount();
+            }
 
-            // Thêm interval để cập nhật cart count định kỳ (tùy chọn)
-            setInterval(updateCartCount, 30000); // Cập nhật mỗi 30 giây
+            filterMenu('starter');
+
+            if (typeof updateCartCount === 'function') { // ✅ Thêm function check
+                await updateCartCount(); // ✅ Thêm await
+            }
         };
 
         // Hàm xử lý sau khi đăng nhập thành công - SYNC TẤT CẢ
-        function handleLoginSuccess(data) {
+        async function handleLoginSuccess(data) { // ✅ Thêm async
             localStorage.setItem('jwt', data.token);
 
             if(data.isAdmin) {
@@ -62,6 +129,7 @@
             }
         }
     </script>
+
 </head>
 <body>
 <header>
@@ -71,6 +139,7 @@
     <nav>
         <a href="home">Home</a>
         <a href="menu">Menu</a>
+        <a href ="tracking">Tracking</a>
         <button class="login-btn" onclick="openLoginModal()">Login</button>
     </nav>
 </header>
@@ -261,7 +330,6 @@
         sessionStorage.removeItem('cart');
         closeSessionCartChoiceModal();
 
-        // Cập nhật UI sau khi xóa giỏ hàng
         updateUIAfterLogin();
         if (typeof updateCartCount === 'function') {
             updateCartCount();
@@ -310,7 +378,7 @@
                 const data = await response.json();
                 if (data.success) {
                     closeGuestCheckoutModal();
-                    handleLoginSuccess(data);
+                    await handleLoginSuccess(data); // ✅ Thêm await
                 } else {
                     alert('Login failed: ' + (data.errorMessage || 'Unknown error'));
                 }
@@ -351,7 +419,7 @@
         }
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', async function() { // ✅ Thêm async
         if (sessionStorage.getItem('showSessionCartChoice') === '1') {
             sessionStorage.removeItem('showSessionCartChoice');
             openSessionCartChoiceModal();
@@ -359,15 +427,14 @@
 
         const checkoutBtn = document.getElementById('checkout-btn');
         if (checkoutBtn) {
-            checkoutBtn.onclick = function(e) {
+            checkoutBtn.onclick = async function(e) { // ✅ Thêm async
                 e.preventDefault();
                 const jwt = localStorage.getItem('jwt');
-                if (!isJwtValid(jwt)) {
+                if (!(await isJwtValid(jwt))) { // ✅ Thêm await và sửa logic
                     openGuestCheckoutModal();
                 } else {
                     const sessionCart = JSON.parse(sessionStorage.getItem('cart') || '[]');
                     if (sessionCart.length > 0) {
-                        // Sử dụng hàm đã được định nghĩa
                         showCartChoiceModal();
                     } else {
                         window.location.href = 'checkout';
@@ -375,31 +442,35 @@
                 }
             }
         }
+
+        // ✅ Sửa form login chính
+        const loginForm = document.querySelector('#loginModal form');
+        if (loginForm) {
+            loginForm.onsubmit = async function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+
+                try {
+                    const response = await fetch('login', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+
+                    if (data.success) {
+                        closeLoginModal();
+                        await handleLoginSuccess(data); // ✅ Thêm await
+                    } else {
+                        alert('Login failed: ' + (data.errorMessage || 'Unknown error'));
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    alert('Đã xảy ra lỗi khi đăng nhập. Vui lòng thử lại.');
+                }
+            };
+        }
     });
 
-    // Cập nhật form login chính - SỬ DỤNG CHUNG handleLoginSuccess
-    document.querySelector('#loginModal form').onsubmit = async function(e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-
-        try {
-            const response = await fetch('login', {
-                method: 'POST',
-                body: formData
-            });
-            const data = await response.json();
-
-            if (data.success) {
-                closeLoginModal();
-                handleLoginSuccess(data);
-            } else {
-                alert('Login failed: ' + (data.errorMessage || 'Unknown error'));
-            }
-        } catch (error) {
-            console.error('Login error:', error);
-            alert('Đã xảy ra lỗi khi đăng nhập. Vui lòng thử lại.');
-        }
-    };
     function showCartChoiceModal() {
         const modal = document.createElement('div');
         modal.id = 'cartChoiceModal';
@@ -429,9 +500,11 @@
         }
     }
 </script>
+
+<script src="js/loginUtils.js"></script>
 <script src="js/cart.js"></script>
 <script src="js/search.js"></script>
-<script src="js/loginUtils.js"></script>
+
 
 </body>
 </html>

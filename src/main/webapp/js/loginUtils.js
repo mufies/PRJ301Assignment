@@ -1,6 +1,6 @@
 function openLoginModal() {
-            document.getElementById('loginModal').classList.add('active');
-        }
+    document.getElementById('loginModal').classList.add('active');
+}
 
 function closeLoginModal() {
     document.getElementById('loginModal').classList.remove('active');
@@ -19,9 +19,9 @@ function openEnterForgotPassword() {
     document.getElementById('enterForgotPasswordModal').classList.add('active');
 }
 
-function openUserModal() {
+async function openUserModal() {
     const jwt = localStorage.getItem('jwt');
-    if (isJwtValid(jwt)) {
+    if (await isJwtValid(jwt)) {
         document.getElementById('loggedModal').classList.add('active');
     } else {
         openLoginModal();
@@ -44,15 +44,27 @@ function logout() {
     window.location.reload();
 }
 
-function isJwtValid(token) {
+async function isJwtValid(token) {
     if (!token) return false;
     try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        return !payload.exp || (Date.now() / 1000 < payload.exp);
+        const requestData = { isJwtValid: token };
+        const response = await fetch('JwtServlet', {  // ✅ Thêm 'await'
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();  // ✅ Thêm 'await'
+        return data.isJwtValid;
     } catch (e) {
         return false;
     }
 }
+
 
 // Handle modal clicks outside
 window.onclick = function(event) {
@@ -63,13 +75,13 @@ window.onclick = function(event) {
     });
 };
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function () {
     // Update login button state
     const jwt = localStorage.getItem('jwt');
     const loginBtn = document.querySelector('.login-btn');
 
     if (loginBtn) {
-        if (isJwtValid(jwt)) {
+        if (await isJwtValid(jwt)) {
             loginBtn.innerHTML = '<i class="fa-solid fa-user" style="font-size: 15px"></i>';
             loginBtn.onclick = openUserModal;
         } else {
@@ -80,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const loginForm = document.querySelector('#loginModal form');
     if (loginForm) {
-        loginForm.onsubmit = async function(e) {
+        loginForm.onsubmit = async function (e) {
             e.preventDefault();
 
             const submitBtn = this.querySelector('button[type="submit"]');
@@ -139,7 +151,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set up forgot password form handler
     const forgotForm = document.querySelector('#forgotPasswordModal form');
     if (forgotForm) {
-        forgotForm.onsubmit = async function(e) {
+        forgotForm.onsubmit = async function (e) {
             e.preventDefault();
 
             const submitBtn = this.querySelector('button[type="submit"]');

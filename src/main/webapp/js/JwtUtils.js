@@ -18,11 +18,12 @@ async function getRoleFromJwt(token) {
     }
 }
 
- function isJwtValid(token) {
+async function isJwtValid(token) {
     if (!token) return false;
+
     try {
         const requestData = { isJwtValid: token };
-        const response =  callJwtServlet(requestData);
+        const response = await callJwtServlet(requestData);
 
         if (response.error) {
             console.error('Error validating JWT:', response.error);
@@ -37,9 +38,9 @@ async function getRoleFromJwt(token) {
     }
 }
 
- function callJwtServlet(requestData) {
+async function callJwtServlet(requestData) {
     try {
-        const response =  fetch('JwtServlet', {
+        const response = await fetch('JwtServlet', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -48,10 +49,10 @@ async function getRoleFromJwt(token) {
         });
 
         if (!response.ok) {
-             new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        return  response.json();
+        return await response.json();
 
     } catch (error) {
         console.error('Error calling JwtServlet:', error);
