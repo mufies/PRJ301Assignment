@@ -66,6 +66,59 @@ public class UserDAOImpl {
             return new RegisterResult(false, "❌ Lỗi hệ thống khi kiểm tra tài khoản: " + e.getMessage());
         }
 
+    String checkAdminSql = "SELECT username, email, phone FROM Admin WHERE username = ? OR email = ? OR phone = ?";
+    try (Dbconnect db = new Dbconnect();
+         Connection con = db.getConnection();
+         PreparedStatement checkAdminPs = con.prepareStatement(checkAdminSql)) {
+
+        checkAdminPs.setString(1, username);
+        checkAdminPs.setString(2, email);
+        checkAdminPs.setString(3, phone);
+        ResultSet rs = checkAdminPs.executeQuery();
+
+        if (rs.next()) {
+            if (username.equals(rs.getString("username"))) {
+                return new RegisterResult(false, "❌ Tên đăng nhập đã được sử dụng bởi Admin.");
+            }
+            if (email.equals(rs.getString("email"))) {
+                return new RegisterResult(false, "❌ Email đã được sử dụng bởi Admin.");
+            }
+            if (phone.equals(rs.getString("phone"))) {
+                return new RegisterResult(false, "❌ Số điện thoại đã được sử dụng bởi Admin.");
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+        return new RegisterResult(false, "❌ Lỗi hệ thống khi kiểm tra Admin: " + e.getMessage());
+    }
+
+    // Check Employee table
+    String checkEmpSql = "SELECT username, email, phone FROM Employee WHERE username = ? OR email = ? OR phone = ?";
+    try (Dbconnect db = new Dbconnect();
+         Connection con = db.getConnection();
+         PreparedStatement checkEmpPs = con.prepareStatement(checkEmpSql)) {
+
+        checkEmpPs.setString(1, username);
+        checkEmpPs.setString(2, email);
+        checkEmpPs.setString(3, phone);
+        ResultSet rs = checkEmpPs.executeQuery();
+
+        if (rs.next()) {
+            if (username.equals(rs.getString("username"))) {
+                return new RegisterResult(false, "❌ Tên đăng nhập đã được sử dụng bởi nhân viên.");
+            }
+            if (email.equals(rs.getString("email"))) {
+                return new RegisterResult(false, "❌ Email đã được sử dụng bởi nhân viên.");
+            }
+            if (phone.equals(rs.getString("phone"))) {
+                return new RegisterResult(false, "❌ Số điện thoại đã được sử dụng bởi nhân viên.");
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+        return new RegisterResult(false, "❌ Lỗi hệ thống khi kiểm tra nhân viên: " + e.getMessage());
+    }
+
         // ==== THỰC HIỆN ĐĂNG KÝ ====
         String insertSql = "INSERT INTO Users (username, password, full_name, email, phone, address) VALUES (?, ?, ?, ?, ?, ?)";
         try (Dbconnect db = new Dbconnect();
