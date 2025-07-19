@@ -314,6 +314,48 @@
     </div>
 </div>
 
+<!-- Nút mở chatbot -->
+<div class="chatbot-toggle" id="chatbotToggle" onclick="openChatbot()">
+    <i class="fas fa-comments"></i>
+</div>
+
+<!-- Container chatbot (ẩn mặc định) -->
+<div class="chatbot-overlay" id="chatbotOverlay" onclick="closeChatbot()">
+    <div class="chatbot-container" onclick="event.stopPropagation()">
+        <div class="chat-header">
+            <h1>Chatbot</h1>
+            <p>Tư vấn món ăn</p>
+            <button class="close-chatbot" onclick="closeChatbot()">&times;</button>
+        </div>
+
+        <div class="api-status" id="apiStatus">
+            <span id="statusText">🔄 Đang kết nối Gemini API...</span>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot">
+                <div class="avatar bot-avatar">🤖</div>
+                <div class="message-bubble">Xin chào! Tôi có thể tư vấn món ăn cho bạn. Hãy cho tôi biết bạn muốn ăn gì nhé! ✨</div>
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="avatar bot-avatar">🤖</div>
+            <div class="typing-dots">AI đang gõ</div>
+        </div>
+
+        <div class="chat-input-container">
+            <input type="text" class="chat-input" id="chatInput"
+                   placeholder="Hỏi về món ăn..."
+                   onkeypress="handleKeyPress(event)">
+            <button class="send-button" id="sendButton" onclick="sendMessage()">
+                📤
+            </button>
+        </div>
+    </div>
+</div>
+
+
 <script>
     function openSessionCartChoiceModal() {
         document.getElementById('sessionCartChoiceModal').classList.add('active');
@@ -498,8 +540,26 @@
             }, 300);
         }
     }
+    // Điều khiển mở/đóng chatbot
+    function openChatbot() {
+        document.getElementById('chatbotOverlay').classList.add('active');
+        document.getElementById('chatInput').focus();
+    }
+
+    function closeChatbot() {
+        document.getElementById('chatbotOverlay').classList.remove('active');
+    }
+
+    // Xử lý ESC key để đóng chatbot
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeChatbot();
+        }
+    });
+
 </script>
 
+<script src="js/chatbot.js"></script>
 <script src="js/loginUtils.js"></script>
 <script src="js/cart.js"></script>
 <script src="js/search.js"></script>
