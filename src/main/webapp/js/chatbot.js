@@ -12,7 +12,7 @@ async function initializeGeminiBackend() {
 
         if (allProducts.length > 0) {
             isInitialized = true;
-            updateApiStatus('connected', '✅ Đã kết nối chatbot backend');
+            // updateApiStatus('connected', '✅ Đã kết nối chatbot backend');
             console.log('🎉 Chatbot backend initialized successfully!');
         } else {
             throw new Error('No products found');
