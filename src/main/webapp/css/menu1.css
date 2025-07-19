@@ -1366,3 +1366,381 @@ footer {
     }
 }
 
+/* Nút toggle chatbot */
+.chatbot-toggle {
+    position: fixed;
+    bottom: 100px; /* Phía trên cart icon */
+    right: 30px;
+    background: #9B3F3F; /* Đổi sang màu menu */
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(155, 63, 63, 0.3); /* Đổi shadow màu menu */
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 9998;
+    transition: transform 0.3s ease;
+    color: #FFF0DD; /* Đổi màu text menu */
+    font-size: 24px;
+}
+
+
+.chatbot-toggle:hover {
+    transform: scale(1.1);
+}
+
+/* Overlay chatbot */
+.chatbot-overlay {
+    position: fixed;
+    bottom: 170px; /* Thay vì top */
+    right: 30px;   /* Thay vì left */
+    width: 380px;
+    height: 500px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    z-index: 9999;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    animation: slideUp 0.3s ease;
+}
+
+.chatbot-overlay.active {
+    display: flex;
+}
+
+/* Container chatbot */
+.chatbot-overlay .chatbot-container {
+    height: 600px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px); /* Từ dưới lên */
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Nút toggle chatbot */
+
+
+
+/* Container chatbot - ở góc phải dưới */
+.chatbot-overlay {
+    position: fixed;
+    bottom: 170px; /* Phía trên nút toggle */
+    right: 30px;
+    width: 380px;
+    height: 500px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    z-index: 9999;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    animation: slideUp 0.3s ease;
+}
+
+.chatbot-overlay.active {
+    display: flex;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+/* Header chatbot - Chỉnh màu theme menu */
+.chatbot-overlay .chat-header {
+    background: #9B3F3F; /* Thay đổi từ green sang màu menu */
+    color: #FFF0DD; /* Màu text menu */
+    padding: 15px 20px;
+    text-align: center;
+    position: relative;
+    border-radius: 20px 20px 0 0;
+}
+
+.chatbot-overlay .chat-header h1 {
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+.chatbot-overlay .chat-header p {
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+/* Nút đóng */
+.close-chatbot {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #FFF0DD; /* Màu text menu */
+    font-size: 20px;
+    cursor: pointer;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s;
+}
+
+.close-chatbot:hover {
+    background: rgba(255, 240, 221, 0.2); /* Hover màu menu */
+}
+
+/* Messages area - Chỉnh màu nền */
+.chatbot-overlay .chat-messages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    background: #ffffff; /* Màu trắng như product items */
+    max-height: 300px;
+}
+
+.chatbot-overlay .message {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: flex-start;
+    animation: fadeIn 0.3s ease;
+}
+
+.chatbot-overlay .message.user {
+    justify-content: flex-end;
+}
+
+.chatbot-overlay .message.bot {
+    justify-content: flex-start;
+}
+
+.chatbot-overlay .message-bubble {
+    max-width: 75%;
+    padding: 10px 14px;
+    border-radius: 15px;
+    word-wrap: break-word;
+    line-height: 1.4;
+    font-family: inherit;
+    word-break: break-word;
+    white-space: pre-wrap;
+    font-size: 13px;
+}
+
+.chatbot-overlay .message.user .message-bubble {
+    background: #9B3F3F; /* Màu chủ đạo menu */
+    color: #FFF0DD; /* Màu text menu */
+    border-bottom-right-radius: 5px;
+}
+
+.chatbot-overlay .message.bot .message-bubble {
+    background: #FFF0DD; /* Màu nền menu */
+    color: #333;
+    border: 1px solid rgba(155, 63, 63, 0.2); /* Border màu menu */
+    border-bottom-left-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.chatbot-overlay .avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin: 0 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: #FFF0DD; /* Màu text menu */
+}
+
+.chatbot-overlay .user-avatar {
+    background: #9B3F3F; /* Màu chủ đạo menu */
+}
+
+.chatbot-overlay .bot-avatar {
+    background: #9B3F3F; /* Màu chủ đạo menu */
+}
+
+/* Input area - Chỉnh màu nền */
+.chatbot-overlay .chat-input-container {
+    padding: 15px;
+    background: #FFF0DD; /* Màu nền menu */
+    border-top: 1px solid rgba(155, 63, 63, 0.2); /* Border màu menu */
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 0 0 20px 20px;
+}
+
+.chatbot-overlay .chat-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 2px solid #ccc; /* Border như search box */
+    border-radius: 20px;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.3s ease;
+    font-family: inherit;
+}
+
+.chatbot-overlay .chat-input:focus {
+    border-color: #9B3F3F; /* Focus màu menu */
+}
+
+.chatbot-overlay .send-button {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: #9B3F3F; /* Màu chủ đạo menu */
+    color: #FFF0DD; /* Màu text menu */
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+}
+
+.chatbot-overlay .send-button:hover {
+    transform: scale(1.1);
+    background: #7d3333; /* Hover darker */
+}
+
+.chatbot-overlay .send-button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: scale(1);
+}
+
+/* Typing indicator */
+.chatbot-overlay .typing-indicator {
+    display: none;
+    padding: 8px 15px;
+    color: #666;
+    font-style: italic;
+    font-size: 12px;
+    align-items: center;
+}
+
+.chatbot-overlay .typing-dots {
+    display: inline-block;
+}
+
+.chatbot-overlay .typing-dots::after {
+    content: '';
+    animation: typing 1.4s infinite;
+}
+
+@keyframes typing {
+    0%, 60% { content: ''; }
+    30% { content: '.'; }
+    60% { content: '..'; }
+    90% { content: '...'; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* API Status - Chỉnh màu */
+.chatbot-overlay .api-status {
+    text-align: center;
+    padding: 8px;
+    font-size: 11px;
+    color: #9B3F3F; /* Màu chủ đạo menu */
+    border-bottom: 1px solid rgba(155, 63, 63, 0.1); /* Border màu menu */
+    background: #FFF0DD; /* Màu nền menu */
+}
+
+.chatbot-overlay .status-connected {
+    color: #9B3F3F; /* Màu chủ đạo menu */
+}
+
+.chatbot-overlay .status-error {
+    color: #9D484F; /* Màu footer menu */
+}
+
+.chatbot-overlay .error-message {
+    background: #ffebee !important;
+    border: 1px solid #9D484F !important; /* Border màu footer */
+    color: #9D484F !important; /* Text màu footer */
+}
+
+/* Scrollbar styling cho messages - Chỉnh màu */
+.chatbot-overlay .chat-messages::-webkit-scrollbar {
+    width: 4px;
+}
+
+.chatbot-overlay .chat-messages::-webkit-scrollbar-track {
+    background: #FFF0DD; /* Màu nền menu */
+    border-radius: 10px;
+}
+
+.chatbot-overlay .chat-messages::-webkit-scrollbar-thumb {
+    background: #9B3F3F; /* Màu chủ đạo menu */
+    border-radius: 10px;
+}
+
+.chatbot-overlay .chat-messages::-webkit-scrollbar-thumb:hover {
+    background: #7d3333; /* Hover darker */
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .chatbot-overlay {
+        width: calc(100vw - 20px);
+        right: 10px;
+        bottom: 120px;
+        height: 450px;
+    }
+
+    .chatbot-toggle {
+        bottom: 80px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+}
+
+/* Animation khi click toggle */
+.chatbot-toggle.clicked {
+    animation: pulse 0.3s ease;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+
+
