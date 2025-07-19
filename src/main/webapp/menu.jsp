@@ -137,7 +137,6 @@
         <a href="home"> <img src="images/logo.png" alt="Mam Mam Logo"></a>
     </div>
     <nav>
-        <a href="home">Home</a>
         <a href="menu">Menu</a>
         <a href ="tracking">Tracking</a>
         <button class="login-btn" onclick="openLoginModal()">Login</button>
