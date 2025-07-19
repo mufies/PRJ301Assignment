@@ -118,7 +118,6 @@
       <version>2.13.1</version>
     </dependency>
 
-    <!-- Thêm dependency cho database nếu cần (MySQL, MongoDB, v.v.) -->
 
 
   </dependencies>

@@ -4,8 +4,15 @@
     <title>Thông tin tài khoản</title>
 
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/update.css">
+    <link rel="stylesheet" href="css/menu1.css">
+    <link rel="stylesheet" href="css/login.css">
 </head>
 <body>
+<header>
+    <div class="logo">
+        <a href="home"> <img src="images/logo.png" alt="Mam Mam Logo"></a>
+    </div>
+</header>
 <h2>Cập nhật thông tin</h2>
 
 

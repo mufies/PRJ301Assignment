@@ -3,10 +3,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const params = new URLSearchParams(window.location.search);
 
     if (params.get('useSessionCart') === 'true') {
+
         checkoutWithCartFromSessionStorage('user');
+
     } else if (params.get('guest') === 'true') {
         checkoutWithCartFromSessionStorage('guest');
-    } else if (isJwtValid(jwt)) {
+    } else if (isJwtValid(jwt) && !params.get('useSessionCart') && !params.get('guest')) {
         checkoutWithCartFromDB(jwt);
     } else {
         checkoutWithCartFromSessionStorage('guest');
@@ -14,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.getElementById('placeOrderBtn').addEventListener('click', placeOrder);
 });
+
 function isJwtValid(token) {
     if (!token) return false;
     try {
@@ -73,9 +76,6 @@ async function checkoutWithCartFromSessionStorage(status) {
         renderCartItems(itemsToCheckout);
         document.querySelectorAll('.checkout-form').forEach(form => form.style.display = 'block');
     }
-
-
-
 }
 
 function renderCartItems(items) {
@@ -85,10 +85,8 @@ function renderCartItems(items) {
         return;
     }
 
-    // Clear previous items
     listDiv.innerHTML = '';
 
-    // Handle empty cart
     if (!Array.isArray(items) || items.length === 0) {
         document.getElementById('cartItems').style.display = 'none';
         document.getElementById('emptyCart').style.display = 'block';
@@ -99,7 +97,6 @@ function renderCartItems(items) {
     let totalItems = 0;
     let subtotal = 0;
 
-    // Table layout for cart
     const table = document.createElement('table');
     table.className = 'cart-table';
     table.innerHTML = `
@@ -111,7 +108,6 @@ function renderCartItems(items) {
                 <th>Đơn giá</th>
                 <th>Số lượng</th>
                 <th>Thành tiền</th>
-                <th>Xóa</th>
             </tr>
         </thead>
         <tbody></tbody>
@@ -140,18 +136,12 @@ function renderCartItems(items) {
                 <button class="qty-btn" onclick="updateItemQuantity('${item.productId}', 1)">+</button>
             </td>
             <td class="item-total">${itemTotal.toLocaleString()} đ</td>
-            <td class="item-remove">
-                <button class="remove-btn" onclick="removeItem('${item.productId}')">
-                    <i class="fa fa-trash"></i>
-                </button>
-            </td>
         `;
         tbody.appendChild(tr);
     });
 
     listDiv.appendChild(table);
 
-    // Update order summary
     const shippingFee = 15000;
     const total = subtotal + shippingFee;
     document.getElementById('totalItems').textContent = totalItems;
@@ -159,21 +149,20 @@ function renderCartItems(items) {
     document.getElementById('shippingFee').textContent = shippingFee.toLocaleString();
     document.getElementById('totalAmount').textContent = total.toLocaleString();
 
-    // Show order details section
     document.getElementById('cartItems').style.display = 'none';
     document.getElementById('emptyCart').style.display = 'none';
     document.getElementById('orderDetails').style.display = 'flex';
 }
 
-// Function to place order
+// FIXED: Sửa logic place order để không xóa DB cart
 async function placeOrder() {
     const jwt = localStorage.getItem('jwt');
     const isGuest = !isJwtValid(jwt);
+    const params = new URLSearchParams(window.location.search);
 
-    // Get form data
-    const customerName = document.getElementById('customerName').value;
-    const customerPhone = document.getElementById('customerPhone').value;
-    const customerAddress = document.getElementById('customerAddress').value;
+    const customerName = document.getElementById('customerName')?.value || '';
+    const customerPhone = document.getElementById('customerPhone')?.value || '';
+    const customerAddress = document.getElementById('customerAddress')?.value || '';
     const paymentMethod = document.getElementById('paymentMethod')?.value || 'cod';
     const orderNote = document.getElementById('orderNote')?.value || '';
 
@@ -181,12 +170,23 @@ async function placeOrder() {
         let orderData;
         let cartItems = [];
 
-        // Get cart items based on user type
-        if (isGuest || new URLSearchParams(window.location.search).get('useSessionCart') === 'true') {
-            // Get session cart
-            const sessionCart = JSON.parse(sessionStorage.getItem('cart')) || [];
+        if (params.get('useSessionCart') === 'true' && isJwtValid(jwt)) {
+            // FIXED: Thêm session items vào DB trước khi lấy cart
+            await addSessionItemsToDatabase(jwt);
 
-            // Merge items by productId
+            // Sau đó lấy cart từ DB (đã bao gồm cả session items)
+            const response = await fetch('menu', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({action: 'getUserCart', jwt})
+            });
+
+            if (response.ok) {
+                cartItems = await response.json();
+            }
+
+        } else if (isGuest || params.get('guest') === 'true') {
+            const sessionCart = JSON.parse(sessionStorage.getItem('cart')) || [];
             const mergedItems = {};
             sessionCart.forEach(item => {
                 const key = item.productId;
@@ -202,10 +202,8 @@ async function placeOrder() {
                     mergedItems[key].quantity += 1;
                 }
             });
-
             cartItems = Object.values(mergedItems);
         } else {
-            // For logged-in users with DB cart
             const response = await fetch('menu', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -219,13 +217,11 @@ async function placeOrder() {
             cartItems = await response.json();
         }
 
-        // Check if cart is empty
         if (cartItems.length === 0) {
             alert('Your cart is empty');
             return;
         }
 
-        // Prepare order data
         if (isGuest) {
             orderData = {
                 action: 'postGuestOrder',
@@ -244,7 +240,6 @@ async function placeOrder() {
             };
         }
 
-        // Send order to server
         const orderResponse = await fetch('checkout', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -254,13 +249,12 @@ async function placeOrder() {
         const result = await orderResponse.json();
 
         if (result.success) {
-            // Clear cart
-            if (isGuest || new URLSearchParams(window.location.search).get('useSessionCart') === 'true') {
+            // Chỉ clear session cart
+            if (params.get('useSessionCart') === 'true' || isGuest) {
                 sessionStorage.removeItem('cart');
             }
 
             showSuccessModal(result.shippingCode, cartItems);
-
         } else {
             throw new Error(result.errorMessage || 'Failed to place order');
         }
@@ -271,20 +265,38 @@ async function placeOrder() {
     }
 }
 
-function postUserOrder(jwt, items) {
-    return fetch('checkout', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({action: 'postUserOrder', jwt, items})
-    });
-}
+// NEW: Hàm helper để thêm session items vào DB
+async function addSessionItemsToDatabase(jwt) {
+    const sessionCart = JSON.parse(sessionStorage.getItem('cart')) || [];
+    const sessionMerged = {};
 
-function postGuestOrder(items) {
-    return fetch('checkout', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({action: 'postGuestOrder', items})
+    // Merge session items
+    sessionCart.forEach(item => {
+        const key = item.productId;
+        if (!sessionMerged[key]) {
+            sessionMerged[key] = { ...item, quantity: 1 };
+        } else {
+            sessionMerged[key].quantity += 1;
+        }
     });
+
+    // Thêm từng item vào DB bằng API có sẵn
+    for (const item of Object.values(sessionMerged)) {
+        for (let i = 0; i < item.quantity; i++) {
+            await fetch('menu', {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    action: 'addToCart',
+                    productId: item.productId,
+                    productName: item.productName,
+                    image: item.image,
+                    price: item.price.toString(),
+                    jwt: jwt
+                })
+            });
+        }
+    }
 }
 
 function showSuccessModal(shippingCode, items) {
@@ -303,10 +315,91 @@ function showSuccessModal(shippingCode, items) {
         ul.innerHTML = '<li>Không có dữ liệu món ăn.</li>';
     }
 }
+
 function closeSuccessModal() {
     document.getElementById('successModal').style.display = 'none';
     window.location.href = 'menu';
 }
+
 function backToMenu() {
     closeSuccessModal();
+}
+
+async function updateItemQuantity(productId, delta) {
+    const jwt = localStorage.getItem('jwt');
+    const params = new URLSearchParams(window.location.search);
+    const isUsingSessionCart = params.get('useSessionCart') === 'true' || params.get('guest') === 'true';
+
+    if (isUsingSessionCart || !isJwtValid(jwt)) {
+        updateSessionCartQuantity(productId, delta);
+    }
+    else {
+        await updateDatabaseCartQuantity(productId, delta, jwt);
+    }
+
+    // Refresh the cart display
+    if (isUsingSessionCart || params.get('guest') === 'true') {
+        checkoutWithCartFromSessionStorage(params.get('guest') === 'true' ? 'guest' : 'user');
+    } else if (isJwtValid(jwt)) {
+        checkoutWithCartFromDB(jwt);
+    }
+}
+
+function updateSessionCartQuantity(productId, delta) {
+    let cart = JSON.parse(sessionStorage.getItem('cart')) || [];
+    const mergedItems = {};
+
+    cart.forEach(item => {
+        const key = item.productId;
+        if (!mergedItems[key]) {
+            mergedItems[key] = { ...item, quantity: 1 };
+        } else {
+            mergedItems[key].quantity += 1;
+        }
+    });
+
+    if (mergedItems[productId]) {
+        mergedItems[productId].quantity += delta;
+
+        if (mergedItems[productId].quantity <= 0) {
+            delete mergedItems[productId];
+        }
+
+        const newCart = [];
+        Object.values(mergedItems).forEach(item => {
+            for (let i = 0; i < item.quantity; i++) {
+                newCart.push({
+                    productId: item.productId,
+                    productName: item.productName,
+                    image: item.image,
+                    price: item.price
+                });
+            }
+        });
+
+        sessionStorage.setItem('cart', JSON.stringify(newCart));
+    }
+}
+
+async function updateDatabaseCartQuantity(productId, delta, jwt) {
+    try {
+        const endpoint = 'menu';
+        const method = delta > 0 ? 'PUT' : 'DELETE';
+
+        const response = await fetch(endpoint, {
+            method: method,
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                jwt: jwt,
+                productId: productId.toString()
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Failed to update cart:', errorData.message);
+        }
+    } catch (error) {
+        console.error('Error updating cart:', error);
+    }
 }

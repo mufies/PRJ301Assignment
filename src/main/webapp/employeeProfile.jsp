@@ -7,6 +7,8 @@
     <meta charset="UTF-8">
     <title>Chỉnh sửa thông tin nhân viên</title>
     <link rel="stylesheet" href="css/edit-employee.css">
+    <link rel="stylesheet" href="css/menu1.css">
+    <link rel="stylesheet" href="css/login.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <style>
@@ -90,7 +92,16 @@
     }
 </style>
 <body>
-
+<header>
+    <div class="logo">
+        <a href="updateOrderStatus"> <img src="images/logo.png" alt="Mam Mam Logo"></a>
+    </div>
+    <nav>
+        <a href="updateOrderStatus">Dashboard</a>
+        <a href="employeeCheckingOrder">Create Order</a>
+        <a href="updateEmployee">Update Info</a>
+    </nav>
+</header>
 <div class="form-container">
     <h2>Chỉnh sửa thông tin nhân viên</h2>
 

@@ -54,6 +54,22 @@ function loadOrders() {
         success: function (data) {
             const tbody = $("#orderTable tbody");
             tbody.empty();
+
+            // Sắp xếp đơn hàng theo ngày mới nhất lên đầu
+            data = data.sort((a, b) => {
+                // Xử lý định dạng ngày "7/18/2025, 3:37:46 PM"
+                const parseDate = (dateStr) => {
+                    // Chuyển đổi string thành Date object
+                    return new Date(dateStr);
+                };
+
+                const dateA = parseDate(a.orderDate);
+                const dateB = parseDate(b.orderDate);
+
+                // Sắp xếp giảm dần (mới nhất trước)
+                return dateB.getTime() - dateA.getTime();
+            });
+
             window.ordersData = data; // Lưu lại để dùng khi show chi tiết
 
             data.forEach(order => {

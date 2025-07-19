@@ -182,11 +182,11 @@
             <img src="images/logo.png" alt="Mam Mam Logo" class="modal-logo">
             <h2 class="modal-subtitle">TÀI KHOẢN CỦA BẠN</h2>
             <div class="user-options" style="justify-content: center; align-items: center;">
-                <button class="option-btn" onclick="window.location.href='settings.jsp'" style="justify-content: center; align-items: center;">
+                <button class="option-btn" onclick="window.location.href='profile'" style="justify-content: center; align-items: center;">
                     <i class="fa-solid fa-gear"></i>
                     Cài đặt tài khoản
                 </button>
-                <button class="option-btn" onclick="window.location.href='history.jsp'" style="justify-content: center; align-items: center;">
+                <button class="option-btn" onclick="window.location.href='history'" style="justify-content: center; align-items: center;">
                     <i class="fa-solid fa-clock-rotate-left"></i>
                     Lịch sử mua hàng
                 </button>

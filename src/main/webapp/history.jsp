@@ -7,6 +7,8 @@
     <title>Lịch sử mua hàng</title>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/history.css">
+    <link rel="stylesheet" href="css/menu1.css">
+    <link rel="stylesheet" href="css/login.css">
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -86,12 +88,16 @@
 <script src="js/update.js"></script>
 
 <body>
+<header>
+    <div class="logo">
+        <a href="home"> <img src="images/logo.png" alt="Mam Mam Logo"></a>
+    </div>
+</header>
 <h2>Lịch sử mua hàng</h2>
 
 <table border="1">
     <thead>
     <tr>
-        <th>Mã đơn</th>
         <th>Ngày đặt</th>
         <th>Tổng tiền</th>
         <th>Trạng thái</th>
@@ -102,7 +108,27 @@
 </table>
 
 <p id="no-orders" style="display:none;">Không có đơn hàng nào.</p>
-
+<div id="loggedModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeLoggedModal()">&times;</span>
+        <img src="images/logo.png" alt="Mam Mam Logo" class="modal-logo">
+        <h2 class="modal-subtitle">TÀI KHOẢN CỦA BẠN</h2>
+        <div class="user-options" style="justify-content: center; align-items: center;">
+            <button class="option-btn" onclick="window.location.href='profile'" style="justify-content: center; align-items: center;">
+                <i class="fa-solid fa-gear"></i>
+                Cài đặt tài khoản
+            </button>
+            <button class="option-btn" onclick="window.location.href='history'" style="justify-content: center; align-items: center;">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                Lịch sử mua hàng
+            </button>
+            <button class="option-btn logout-btn" onclick="logout()" style="justify-content: center; align-items: center;">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                Đăng xuất
+            </button>
+        </div>
+    </div>
+</div>
 <script>
     const contextPath = "${pageContext.request.contextPath}";
 

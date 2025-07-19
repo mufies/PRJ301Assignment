@@ -3,87 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var cartPopup = document.querySelector('.cart-popup');
 
     cartIcon.addEventListener('click', async function (e) {
-        const jwt = localStorage.getItem('jwt');
-        if (isJwtValid(jwt)) {
-            try {
-                const response = await fetch('menu', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'getUserCart', jwt })
-                });
-                if (response.ok) {
-                    const cartItems = await response.json();
-                    const loggedInList = cartPopup.querySelector('.cart-items.logged-in');
-                    loggedInList.innerHTML = '';
-                    let total = 0;
-                    cartItems.forEach(item => {
-                        const productName = item.productName || item.product_name || '';
-                        const price = parseFloat(item.price || item.price || 0);
-                        const productId = item.productId || item.product_id || '';
-                        const quantity = item.quantity || 1;
-                        total += price * quantity;
-                        const li = document.createElement('li');
-                        li.innerHTML = `
-                            <span class="cart-item-name">${productName}</span>
-                            <span class="cart-item-price">${price}</span>
-                            <span class="cart-item-qty">x${quantity}</span>
-                            <button class="remove-btn" onclick="removeFromCartServer('${productId}')">X</button>
-                        `;
-                        loggedInList.appendChild(li);
-                    });
-                    cartPopup.querySelector('.cart-total-price').textContent = total;
-                    cartPopup.querySelector('.cart-items.unlogged-in').style.display = 'none';
-                    loggedInList.style.display = '';
-                } else {
-                    cartPopup.querySelector('.cart-items.logged-in').innerHTML = '<li>Lỗi lấy giỏ hàng!</li>';
-                }
-            } catch (err) {
-                cartPopup.querySelector('.cart-items.logged-in').innerHTML = '<li>Lỗi kết nối server!</li>';
-            }
-            cartPopup.classList.add('active');
-        } else {
-            const cartItems = JSON.parse(sessionStorage.getItem('cart')) || [];
-            const unloggedInList = cartPopup.querySelector('.cart-items.unlogged-in');
-            unloggedInList.innerHTML = '';
-
-            // Merge items by productId
-            const mergedItems = {};
-            cartItems.forEach(item => {
-                const key = item.productId;
-                if (!mergedItems[key]) {
-                    mergedItems[key] = { ...item, quantity: 1 };
-                } else {
-                    mergedItems[key].quantity += 1;
-                }
-            });
-
-            // Optional: Debug log
-            // Object.values(mergedItems).forEach(item => {
-            //     console.log(item.productName, item.quantity);
-            // });
-
-            let total = 0;
-            Object.values(mergedItems).forEach(item => {
-                const price = parseFloat(item.price || 0);
-                const name = item.productName || "Unknown Product";
-                const itemTotal = price * item.quantity;
-                total += itemTotal;
-                console.log(item.productName);
-                const li = document.createElement('li');
-                li.innerHTML = `
-            <span class="cart-item-name">${name}</span>
-            <span class="cart-item-quantity">x${item.quantity}</span>
-            <span class="cart-item-price">${itemTotal.toFixed(0)}</span>
-            <button class="remove-btn" onclick="removeFromCart('${item.productId}')">X</button>
-        `;
-                unloggedInList.appendChild(li);
-            });
-
-            cartPopup.querySelector('.cart-total-price').textContent = total.toFixed(0);
-            cartPopup.querySelector('.cart-items.logged-in').style.display = 'none';
-            unloggedInList.style.display = '';
-            cartPopup.classList.add('active');
-        }
+        await updateCartPopup();
         e.stopPropagation();
     });
 
@@ -95,38 +15,195 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-document.querySelector('#loginModal form').onsubmit = async function(e) {
-    e.preventDefault();
-    const formData = new FormData(this);
-    const response = await fetch('login', {
-        method: 'POST',
-        body: formData
-    });
-    const data = await response.json();
-    if (data.success) {
-        localStorage.setItem('jwt', data.token);
-        if( data.isAdmin) {
-            window.location.href = 'ayxkix';
 
-        }
-        else if (data.isEmployee) {
-            window.location.href = 'updateOrderStatus';
-        }
-        else {
-            const sessionCart = JSON.parse(sessionStorage.getItem('cart') || '[]');
-            if (sessionCart.length > 0) {
-                // Đánh dấu để menu.jsp biết cần hiện modal hỏi
-                sessionStorage.setItem('showSessionCartChoice', '1');
-            }
-            window.location.href = 'menu';
-        }
-    } else {
-        alert('Login failed: ' + (data.errorMessage || 'Unknown error'));
+async function updateCartPopup() {
+    const cartPopup = document.querySelector('.cart-popup');
+    const jwt = localStorage.getItem('jwt');
+
+    // Hiển thị popup ngay lập tức
+    if (!cartPopup.classList.contains('active')) {
+        cartPopup.classList.add('active');
     }
-};
+
+    fadeOutCartItems();
+
+    setTimeout(async () => {
+        if (isJwtValid(jwt)) {
+            await updateLoggedInCart();
+        } else {
+            updateUnloggedInCart();
+        }
+    }, 200);
+}
+
+function fadeOutCartItems() {
+    const allItems = document.querySelectorAll('.cart-items li');
+    allItems.forEach(item => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateX(-20px)';
+    });
+}
+
+function fadeInCartItems(container) {
+    const items = container.querySelectorAll('li');
+    items.forEach((item, index) => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateX(-20px)';
+        setTimeout(() => {
+            item.style.opacity = '1';
+            item.style.transform = 'translateX(0)';
+        }, index * 80);
+    });
+}
+
+async function updateLoggedInCart() {
+    const cartPopup = document.querySelector('.cart-popup');
+    const jwt = localStorage.getItem('jwt');
+
+    try {
+        const response = await fetch('menu', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'getUserCart', jwt })
+        });
+
+        if (response.ok) {
+            const cartItems = await response.json();
+            const loggedInList = cartPopup.querySelector('.cart-items.logged-in');
+            const unloggedInList = cartPopup.querySelector('.cart-items.unlogged-in');
+
+            loggedInList.innerHTML = '';
+            let total = 0;
+
+            cartItems.forEach(item => {
+                const productName = item.productName || item.product_name || '';
+                const price = parseFloat(item.price || 0);
+                const productId = item.productId || item.product_id || '';
+                const quantity = item.quantity || 1;
+                total += price * quantity;
+
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div class="cart-item-info">
+                        <span class="cart-item-name">${productName}</span>
+                        <div class="cart-item-details">
+                            <span class="cart-item-qty">x${quantity}</span>
+                            <span class="cart-item-price">${price.toFixed(0)}đ</span>
+                        </div>
+                    </div>
+                    <button class="remove-btn" onclick="removeFromCartServer('${productId}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                loggedInList.appendChild(li);
+            });
+
+            cartPopup.querySelector('.cart-total-price').textContent = total.toFixed(0) + 'đ';
+            unloggedInList.style.display = 'none';
+            loggedInList.style.display = 'block';
+
+            fadeInCartItems(loggedInList);
+
+        } else {
+            const loggedInList = cartPopup.querySelector('.cart-items.logged-in');
+            loggedInList.innerHTML = '<li class="error-message">Lỗi lấy giỏ hàng!</li>';
+            loggedInList.style.display = 'block';
+        }
+    } catch (err) {
+        const loggedInList = cartPopup.querySelector('.cart-items.logged-in');
+        loggedInList.innerHTML = '<li class="error-message">Lỗi kết nối server!</li>';
+        loggedInList.style.display = 'block';
+    }
+}
+
+function updateUnloggedInCart() {
+    const cartPopup = document.querySelector('.cart-popup');
+    const cartItems = JSON.parse(sessionStorage.getItem('cart')) || [];
+    const loggedInList = cartPopup.querySelector('.cart-items.logged-in');
+    const unloggedInList = cartPopup.querySelector('.cart-items.unlogged-in');
+
+    // Merge items by productId
+    const mergedItems = {};
+    cartItems.forEach(item => {
+        const key = item.productId;
+        if (!mergedItems[key]) {
+            mergedItems[key] = { ...item, quantity: 1 };
+        } else {
+            mergedItems[key].quantity += 1;
+        }
+    });
+
+    unloggedInList.innerHTML = '';
+    let total = 0;
+
+    Object.values(mergedItems).forEach(item => {
+        const price = parseFloat(item.price || 0);
+        const name = item.productName || "Unknown Product";
+        const itemTotal = price * item.quantity;
+        total += itemTotal;
+
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <div class="cart-item-info">
+                <span class="cart-item-name">${name}</span>
+                <div class="cart-item-details">
+                    <span class="cart-item-qty">x${item.quantity}</span>
+                    <span class="cart-item-price">${itemTotal.toFixed(0)}đ</span>
+                </div>
+            </div>
+            <button class="remove-btn" onclick="removeFromCartUnlogged('${item.productId}')">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        unloggedInList.appendChild(li);
+    });
+
+    cartPopup.querySelector('.cart-total-price').textContent = total.toFixed(0) + 'đ';
+    loggedInList.style.display = 'none';
+    unloggedInList.style.display = 'block';
+
+    // Fade in items
+    fadeInCartItems(unloggedInList);
+}
+
+
+
+function animateCartCount(element, newCount) {
+    element.style.transform = 'scale(1.3)';
+    element.style.backgroundColor = '#9B3F3F';
+    element.style.transition = 'all 0.2s ease';
+
+    setTimeout(() => {
+        element.textContent = newCount;
+        element.style.transform = 'scale(1)';
+        element.style.backgroundColor = '#9B3F3F';
+    }, 150);
+}
+
+function updateCartCount() {
+    const jwt = localStorage.getItem('jwt');
+    const cartCountElement = document.getElementById('cart-count');
+
+    if (isJwtValid(jwt)) {
+        fetch('menu', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'getUserCart', jwt })
+        })
+            .then(res => res.json())
+            .then(cartItems => {
+                const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+                animateCartCount(cartCountElement, totalQuantity);
+            });
+    } else {
+        const cart = JSON.parse(sessionStorage.getItem('cart')) || [];
+        animateCartCount(cartCountElement, cart.length);
+    }
+}
 
 function addToCart(productId, productName, image, price) {
     const jwt = localStorage.getItem('jwt');
+
     if (isJwtValid(jwt)) {
         fetch('menu', {
             method: 'PUT',
@@ -137,20 +214,31 @@ function addToCart(productId, productName, image, price) {
             .then(data => {
                 if (data.success) {
                     updateCartCount();
+                    // Cập nhật popup nếu đang mở
+                    if (document.querySelector('.cart-popup').classList.contains('active')) {
+                        updateCartPopup();
+                    }
                 } else {
-                    alert('Failed to add item to cart: ' + data.errorMessage);
+                    showNotification('Không thể thêm sản phẩm vào giỏ hàng', 'error');
                 }
+            })
+            .catch(error => {
+                showNotification('Lỗi kết nối server', 'error');
             });
     } else {
         let cart = JSON.parse(sessionStorage.getItem('cart')) || [];
         cart.push({ productId, productName, image, price });
         sessionStorage.setItem('cart', JSON.stringify(cart));
         updateCartCount();
+        if (document.querySelector('.cart-popup').classList.contains('active')) {
+            updateCartPopup();
+        }
     }
 }
 
-function removeFromCart(productId) {
+function removeFromCartUnlogged(productId) {
     let cart = JSON.parse(sessionStorage.getItem('cart')) || [];
+    const itemToRemove = cart.find(item => item.productId === productId);
     const itemCount = cart.filter(item => item.productId === productId).length;
 
     if (itemCount > 1) {
@@ -164,9 +252,17 @@ function removeFromCart(productId) {
 
     sessionStorage.setItem('cart', JSON.stringify(cart));
     updateCartCount();
+
+    updateCartPopup();
 }
+
+function removeFromCart(productId) {
+    removeFromCartUnlogged(productId);
+}
+
 function removeFromCartServer(productId) {
     const jwt = localStorage.getItem('jwt');
+
     if (isJwtValid(jwt)) {
         fetch('menu', {
             method: 'DELETE',
@@ -177,15 +273,30 @@ function removeFromCartServer(productId) {
             .then(data => {
                 if (data.success) {
                     updateCartCount();
+                    updateCartPopup();
                 } else {
-                    alert('Failed to remove item from cart: ' + data.errorMessage);
+                    console.log("Không thể xóa sản phẩm khỏi giỏ hàng");
                 }
+            })
+            .catch(error => {
+                console.error('Error removing item from cart:', error);
             });
     } else {
-        let cart = JSON.parse(sessionStorage.getItem('cart')) || [];
-        cart = cart.filter(item => item.productId !== productId);
-        sessionStorage.setItem('cart', JSON.stringify(cart));
-        updateCartCount();
+        removeFromCartUnlogged(productId);
     }
 }
 
+// function updateUIAfterLogin() {
+//     const loginBtn = document.querySelector('.login-btn');
+//     if (loginBtn) {
+//         loginBtn.innerHTML = '<i class="fa-solid fa-user"></i>';
+//         loginBtn.onclick = function() { openLoggedModal(); };
+//
+//         loginBtn.classList.remove('login-btn');
+//     }
+//
+//     // Cập nhật cart count nếu có
+//     if (typeof updateCartCount === 'function') {
+//         updateCartCount();
+//     }
+// }

@@ -3,6 +3,8 @@
 <head>
     <title>Đơn hàng mới</title>
     <link rel="stylesheet" href="css/employeeOrders.css">
+    <link rel="stylesheet" href="css/menu1.css">
+    <link rel="stylesheet" href="css/login.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         /* Modal CSS */
@@ -32,6 +34,16 @@
     </style>
 </head>
 <body>
+<header>
+    <div class="logo">
+        <a href="updateOrderStatus"> <img src="images/logo.png" alt="Mam Mam Logo"></a>
+    </div>
+    <nav>
+        <a href="updateOrderStatus">Dashboard</a>
+        <a href="employeeCheckingOrder">Create Order</a>
+        <a href="updateEmployee">Update Info</a>
+    </nav>
+</header>
 <h2>Đơn hàng đang chờ xử lý</h2>
 <table id="orderTable">
     <thead>

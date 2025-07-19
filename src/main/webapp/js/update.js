@@ -18,7 +18,7 @@ function loadOrderHistory() {
             return res.json();
         })
         .then(data => {
-            const orders = data;
+            let orders = data;
             const tbody = document.getElementById("order-history-body");
             const noOrders = document.getElementById("no-orders");
 
@@ -29,6 +29,22 @@ function loadOrderHistory() {
                 return;
             }
 
+            // Sắp xếp đơn hàng theo ngày mới nhất lên đầu
+// Sắp xếp đơn hàng theo ngày mới nhất lên đầu
+            orders = orders.sort((a, b) => {
+                // Chuyển đổi định dạng dd/mm/yyyy hh:mm sang Date
+                const parseDate = (dateStr) => {
+                    const [datePart, timePart] = dateStr.split(' ');
+                    const [day, month, year] = datePart.split('/');
+                    return new Date(`${year}-${month}-${day}T${timePart}:00`);
+                };
+
+                const dateA = parseDate(a.orderDate);
+                const dateB = parseDate(b.orderDate);
+                return dateB - dateA; // Sắp xếp giảm dần (mới nhất trước)
+            });
+
+
             noOrders.style.display = "none";
 
             orders.forEach(order => {
@@ -36,7 +52,6 @@ function loadOrderHistory() {
                 row.classList.add("order-row");
 
                 row.innerHTML = `
-                        <td>${order.orderId}</td>
                         <td>${(order.orderDate)}</td>
                         <td>${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(order.totalPrice)}</td>
                         <td>${order.status}</td>

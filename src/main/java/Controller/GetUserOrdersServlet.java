@@ -120,7 +120,6 @@ public class GetUserOrdersServlet extends HttpServlet {
 
             out.print(orderJson.toString());
         } catch (Exception e) {
-            // Trả về lỗi dưới dạng JSON
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             JSONObject errorJson = new JSONObject();
             errorJson.put("error", e.getMessage());
