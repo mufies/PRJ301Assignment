@@ -118,7 +118,7 @@
         <thead class="table-light">
         <tr>
             <th>ID</th><th>Họ tên</th><th>Điện thoại</th><th>Email</th>
-            <th>Chức vụ</th><th>Lương</th><th>Trạng thái</th><th>Thao tác</th>
+            <th>Chức vụ</th><th>Lương</th><th>Thao tác</th>
         </tr>
         </thead>
         <tbody id="employeeTableBody">
@@ -130,7 +130,6 @@
                 <td class="employee-email">${e.email}</td>
                 <td>${e.position}</td>
                 <td><fmt:formatNumber value="${e.salary}"/> VND</td>
-                <td>${e.status}</td>
                 <td>
                     <button class="btn btn-warning btn-sm"
                             onclick='openEdit({
