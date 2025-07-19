@@ -540,22 +540,54 @@
             }, 300);
         }
     }
-    // Điều khiển mở/đóng chatbot
+    // ✅ Điều khiển chatbot UI
     function openChatbot() {
-        document.getElementById('chatbotOverlay').classList.add('active');
-        document.getElementById('chatInput').focus();
+        const overlay = document.getElementById('chatbotOverlay');
+        const toggle = document.getElementById('chatbotToggle');
+
+        if (overlay && toggle) {
+            overlay.classList.add('active');
+            toggle.style.display = 'none';
+
+            const chatInput = document.getElementById('chatInput');
+            if (chatInput) chatInput.focus();
+        }
     }
 
     function closeChatbot() {
-        document.getElementById('chatbotOverlay').classList.remove('active');
+        const overlay = document.getElementById('chatbotOverlay');
+        const toggle = document.getElementById('chatbotToggle');
+
+        if (overlay && toggle) {
+            overlay.classList.remove('active');
+            toggle.style.display = 'flex';
+        }
     }
 
-    // Xử lý ESC key để đóng chatbot
+    // ✅ ESC key để đóng chatbot
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             closeChatbot();
         }
     });
+
+    // ✅ Click animation cho toggle button
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleButton = document.getElementById('chatbotToggle');
+        if (toggleButton) {
+            toggleButton.addEventListener('click', function() {
+                this.classList.add('clicked');
+                setTimeout(() => {
+                    this.classList.remove('clicked');
+                }, 300);
+            });
+        }
+    });
+
+    // ✅ Global functions
+    window.openChatbot = openChatbot;
+    window.closeChatbot = closeChatbot;
+
 
 </script>
 
