@@ -12,25 +12,56 @@
 
     <script>
         const token = localStorage.getItem('jwt');
-        if (!isJwtValid(token)) {
+        if (!await isJwtValid(token)) {
             window.location.replace('<%=request.getContextPath()%>/menu');
         } else {
             try {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                if (payload.role !== 'Admin') {
+                const getRole = await getRoleFromJwt(token);
+                if (getRole !== 'Admin') {
                     window.location.replace('<%=request.getContextPath()%>/menu');
                 }
             } catch (e) {
                 window.location.replace('<%=request.getContextPath()%>/menu');
             }
         }
-        function isJwtValid(token) {
+        async function isJwtValid(token) {
             if (!token) return false;
             try {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                return !payload.exp || (Date.now() / 1000 < payload.exp);
+                const requestData = { isJwtValid: token };
+                const response = await fetch('JwtServlet', {  // ✅ Thêm 'await'
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();  // ✅ Thêm 'await'
+                return data.isJwtValid;
             } catch (e) {
+                console.log("❌ Lỗi khi kiểm tra JWT:", e);
                 return false;
+            }
+        }
+        async function getRoleFromJwt(token) {
+            if (!token) return null;
+
+            try {
+                const requestData = { getRole: token };
+                const response = await callJwtServlet(requestData);
+
+                if (response.error) {
+                    console.error('Error getting role from JWT:', response.error);
+                    return null;
+                }
+
+                return response.getRole;
+
+            } catch (error) {
+                console.error('Error calling JwtServlet:', error);
+                return null;
             }
         }
 
@@ -45,7 +76,7 @@
             <li class="nav-item"><a class="nav-link" href="/ayxkix/order"><i class="bi bi-cart-check me-1"></i>Order Management</a></li>
             <li class="nav-item"><a class="nav-link active" href="/ayxkix/customer"><i class="bi bi-people me-1"></i>Customer Management</a></li>
             <li class="nav-item"><a class="nav-link" href="/ayxkix/employee"><i class="bi bi-person-badge me-1"></i>Employee Management</a></li>
-            <li class="nav-item"><a class="nav-link" href="/ayxkix/other"><i class="bi bi-gear me-1"></i>Other</a></li>
+            <li class="nav-item"><a class="nav-link" onclick="logout()" href="#"><i class="bi bi-gear me-1"></i>Logout</a></li>
         </ul>
     </div>
 
@@ -203,6 +234,12 @@
         }
     }
 
+</script>
+<script>
+    function logout() {
+        localStorage.removeItem('jwt');
+        window.location.href = '<%=request.getContextPath()%>/home'; // ✅ Thêm context path
+    }
 </script>
 </body>
 </html>

@@ -51,9 +51,18 @@ public class MenuServlet extends HttpServlet {
         String requestBody = sb.toString();
 
         JSONObject json = new JSONObject(requestBody);
+        if (!json.has("jwt")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"error\":\"Missing JWT\"}");
+            return;
+        }
         String jwt = json.getString("jwt");
+        if (jwt == null || jwt.isEmpty()) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"error\":\"Empty JWT\"}");
+            return;
+        }
         String username = JwtUtils.getUsernameFromToken(jwt);
-        System.out.println("Username extracted from token: " + username);
         UserDAOImpl userDAO = new UserDAOImpl();
         int userID = userDAO.getUserId(username);
         cart = userDAO.getUserCart(userID);
@@ -71,12 +80,10 @@ public class MenuServlet extends HttpServlet {
             cartJson.put(obj);
         }
 
-        // Trả về JSON cho client
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(cartJson.toString());
 
-        System.out.println("Cart items for user ID " + userID + ": " + cart.size());
     }
 
     @Override

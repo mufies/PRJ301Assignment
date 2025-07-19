@@ -53,8 +53,18 @@ function renderOrders(orders) {
         return;
     }
 
+    // ✅ Sort theo ngày từ mới nhất đến cũ nhất
+    const sortedOrders = orders.sort((a, b) => {
+        // Parse date string to Date object
+        const dateA = new Date(a.orderDate);
+        const dateB = new Date(b.orderDate);
+
+        // Sort descending (newest first)
+        return dateB - dateA;
+    });
+
     // Có kết quả
-    resultDiv.innerHTML = orders.map(order => `
+    resultDiv.innerHTML = sortedOrders.map(order => `
     <div class="card mb-2">
       <div class="card-header d-flex justify-content-between">
         <strong>Đơn hàng #${order.orderId}</strong>
@@ -66,8 +76,8 @@ function renderOrders(orders) {
       </div>
       <div class="card-body">
         <p><strong>Khách:</strong> ${order.customerName}</p>
-        <p><strong>Ngày đặt:</strong> ${order.orderDate}</p>
-        <p><strong>Tổng tiền:</strong> ${order.totalPrice} VND</p>
+        <p><strong>Ngày đặt:</strong> ${formatDate(order.orderDate)}</p>
+        <p><strong>Tổng tiền:</strong> ${Number(order.totalPrice).toLocaleString('vi-VN')} VND</p>
         <p><strong>Trạng thái:</strong> ${order.status}</p>
         <p><strong>Ghi chú:</strong> ${order.description || '(không có)'}</p>
       </div>
@@ -75,10 +85,10 @@ function renderOrders(orders) {
         <div class="card-body border-top">
           <h6>Chi tiết sản phẩm:</h6>
           <ul class="list-group">
-            ${order.items.map(i => `
+            ${(order.items || []).map(i => `
               <li class="list-group-item d-flex justify-content-between">
-                <span>${i.productName} x${i.quantity}</span>
-                <span>${i.price} VND</span>
+                <span>${i.productName || 'Unknown Product'} x${i.quantity || 0}</span>
+                <span>${Number(i.price || 0).toLocaleString('vi-VN')} VND</span>
               </li>`).join('')}
           </ul>
         </div>
@@ -86,3 +96,21 @@ function renderOrders(orders) {
     </div>
   `).join('');
 }
+
+// ✅ Helper function để format date cho hiển thị
+function formatDate(dateString) {
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleString('vi-VN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+    } catch (error) {
+        return dateString; // Return original if parsing fails
+    }
+}
+

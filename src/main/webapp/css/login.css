@@ -1,134 +1,148 @@
+/* Reset box-sizing cho toàn bộ trang */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+/* Overlay modal */
 .modal {
     position: fixed;
     z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.6);
-}
-
-.modal-content {
-    background-color: #FFEBD6;
-    margin: 5% auto;
-    padding: 20px;
-    border-radius: 10px;
-    width: 90%;
-    max-width: 400px;
-    text-align: center;
-    position: relative;
-}
-/* Add to your CSS file */
-#forgotPasswordModal {
-    position: fixed;
-    z-index: 1001;
-    left: 0; top: 0; width: 100vw; height: 100vh;
-    background: rgba(0,0,0,0.5);
-    display: none;
+    left: 0; top: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.6);
+    display: flex;
     justify-content: center;
     align-items: center;
-}
-#forgotPasswordModal form {
-    background: #fff;
-    padding: 30px;
-    border-radius: 8px;
-    margin: 100px auto;
-    width: 300px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
 }
 
+.modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Nội dung modal */
+.modal-content {
+    background: #FFEBD6;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+    padding: 32px 28px;
+    max-width: 380px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    animation: modalFadeIn 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+@keyframes modalFadeIn {
+    from { transform: translateY(40px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Logo và tiêu đề */
 .modal-logo {
-    width: 120px;
+    width: 110px;
+    margin-bottom: 12px;
 }
-
 .modal-title {
-    font-size: 28px;
+    font-size: 26px;
     color: #9B2C2C;
-    margin-top: 10px;
+    margin: 6px 0 4px 0;
+    letter-spacing: 1px;
 }
-
 .modal-subtitle {
-    font-size: 18px;
-    margin-bottom: 15px;
+    font-size: 17px;
+    margin-bottom: 16px;
+    color: #444;
 }
 
+/* Input */
 .modal-content input {
-    width: 90%;
-    padding: 10px;
-    margin: 8px 0;
+    width: 100%;
+    padding: 11px;
+    margin: 10px 0 14px 0;
     border-radius: 6px;
     border: 1px solid #ccc;
+    font-size: 15px;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.modal-content input:focus {
+    border-color: #9B2C2C;
 }
 
+/* Button */
 .modal-content button {
-    background-color: #9B2C2C;
-    color: white;
+    background: #9B2C2C;
+    color: #fff;
     border: none;
     padding: 12px;
     border-radius: 6px;
     cursor: pointer;
-    margin-top: 10px;
-    width: 90%;
+    font-size: 16px;
+    margin-top: 8px;
+    width: 100%;
+    transition: background 0.2s;
+}
+.modal-content button:hover {
+    background: #7a2222;
 }
 
-.modal-content .forgot {
+/* Quên mật khẩu & Đăng ký */
+.forgot {
     text-align: right;
     font-size: 13px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
+    width: 100%;
 }
-
-.modal-content .register {
-    margin-top: 15px;
+.register {
+    margin-top: 18px;
     font-size: 14px;
 }
+.register a {
+    color: #9B2C2C;
+    text-decoration: none;
+    font-weight: bold;
+}
 
+/* Nút đóng (close) */
 .close {
     position: absolute;
-    top: 8px;
-    right: 12px;
-    font-size: 24px;
+    top: 9px;
+    right: 14px;
+    font-size: 27px;
     color: #333;
     cursor: pointer;
-}
-.user-options {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-top: 20px;
-    justify-content: center;
-    align-items: center;
-}
-
-.option-btn {
-    padding: 12px 20px;
-    background-color: #f8f8f8;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 16px;
-    transition: background-color 0.3s;
-    justify-content: center;
-}
-
-.option-btn:hover {
-    background-color: #e8e8e8;
-}
-
-.option-btn i {
-    width: 20px;
-}
-
-.logout-btn {
-    margin-top: 10px;
-    background-color: #ff4444;
-    color: white;
+    background: none;
     border: none;
+    z-index: 2;
 }
 
-.logout-btn:hover {
-    background-color: #cc0000;
+/* Responsive cho mobile */
+@media (max-width: 480px) {
+    .modal-content {
+        padding: 20px 8px;
+        max-width: 95vw;
+    }
+    .modal-logo { width: 80px; }
+}
+.user-btn {
+    background: #8B4513;
+    border: none;
+    color: #FFEBD6;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 4px;
 }
 
+.user-btn i {
+    font-size: 15px;
+}
 

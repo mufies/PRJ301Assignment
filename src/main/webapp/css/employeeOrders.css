@@ -1,0 +1,100 @@
+/* Tổng thể trang */
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #fff3e6;
+    margin: 0;
+    padding: 20px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+/* Tiêu đề */
+h2 {
+    color: #b22222; /* đỏ đậm */
+    font-size: 28px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Bảng */
+table {
+    width: 90%;
+    margin: 0 auto; /* <-- dòng này giúp căn giữa bảng */
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+
+/* Header bảng */
+th {
+    background-color: #8B0000; /* đỏ đô */
+    color: white;
+    padding: 12px;
+    text-transform: uppercase;
+}
+
+
+/* Ô bảng */
+td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    text-align: center; /* Giải quyết việc bị lệch trái */
+    vertical-align: middle; /* Giúp cân bằng chiều dọc cho đẹp hơn */
+}
+
+
+/* Button */
+button {
+    padding: 6px 12px;
+    background-color: #b22222;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #a02020;
+}
+
+/* Select */
+select {
+    padding: 6px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #fffaf5;
+}
+
+/* Responsive (nếu cần) */
+@media (max-width: 768px) {
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+
+    th {
+        text-align: center;
+        background-color: transparent;
+        color: #b22222;
+    }
+
+    td {
+        padding: 10px;
+        border: none;
+        border-bottom: 1px solid #ddd;
+        text-align: center;
+    }
+
+    td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        display: block;
+    }
+}

@@ -1,20 +1,17 @@
 package DAO;
 
 import Model.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
 public class OrderDAOImpl {
-
-
-
-
-
-
     public String getOrderByEachMonth() {
         String sql = "SELECT MONTH(order_date) AS month, SUM(total_money) AS total_money " +
                 "FROM Orders WHERE status = N'Đã giao' " +
@@ -362,10 +359,9 @@ public List<OrderItem> getGuestOrderItems(int orderId) {
 
     public List<Order> getAllOrders()
     {
-        String sql = "SELECT o.order_id, u.full_name, o.order_date, o.total_money, o.status, o.description " +
-                "FROM Orders o JOIN Users u ON o.user_id = u.user_id " +
-                "WHERE o.status = N'Đã giao'";
-        String sql2 = "SELECT * FROM OrdersGuest WHERE status = N'Đã giao'";
+        String sql = "SELECT o.order_id, u.username,u.full_name, o.order_date, o.total_money, o.status, o.description " +
+                "FROM Orders o JOIN Users u ON o.user_id = u.user_id ";
+        String sql2 = "SELECT * FROM OrdersGuest";
         List<Order> orders = new ArrayList<>();
         try (Dbconnect db = new Dbconnect();
              Connection con = db.getConnection();
@@ -377,6 +373,7 @@ public List<OrderItem> getGuestOrderItems(int orderId) {
             while (rs.next()) {
                 Order order = new Order();
                 order.setOrderId(rs.getInt("order_id"));
+                order.setUsername(rs.getString("username"));
                 order.setCustomerName(rs.getString("full_name"));
                 order.setOrderDate(rs.getString("order_date"));
                 order.setTotalAmount(rs.getLong("total_money"));
@@ -404,13 +401,359 @@ public List<OrderItem> getGuestOrderItems(int orderId) {
         return orders;
     }
 
+    public int addOrder(int user_id, int total_money, String description, String shippingCode) {
+        String sql = "INSERT INTO Orders (user_id, order_date, total_money, status, description, shipping_code) VALUES (?, GETDATE(), ?, N'Đã nhận đơn', ?,?)";
+        try (Dbconnect db = new Dbconnect();
+             Connection con = db.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, user_id);
+            ps.setInt(2, total_money);
+            ps.setString(3, description);
+            ps.setString(4, shippingCode);
+            int affectedRows = ps.executeUpdate();
+            if (affectedRows > 0) {
+                ResultSet rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    return rs.getInt(1); // order_id vừa tạo
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    // Thêm OrderDetails cho order_id, trả về true nếu thành công
+    public boolean addOrderDetails(int order_id, String orderDetailsJson) {
+        String checkOrderDetailsSql = "SELECT COUNT(*) FROM OrderDetails WHERE order_id = ?";
+        String insertOrderDetailSql = "INSERT INTO OrderDetails (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)";
+        try (Dbconnect db = new Dbconnect();
+             Connection con = db.getConnection()) {
+
+            // Kiểm tra order_id này đã có trong OrderDetails chưa
+            try (PreparedStatement checkStmt = con.prepareStatement(checkOrderDetailsSql)) {
+                checkStmt.setInt(1, order_id);
+                ResultSet checkRs = checkStmt.executeQuery();
+                if (checkRs.next() && checkRs.getInt(1) > 0) {
+                    // Đã có OrderDetails cho order này
+                    return false;
+                }
+            }
+
+            // Parse JSON và insert từng chi tiết
+            JSONArray arr = new JSONArray(orderDetailsJson);
+            try (PreparedStatement insertStmt = con.prepareStatement(insertOrderDetailSql)) {
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject obj = arr.getJSONObject(i);
+                    int product_id = obj.getInt("product_id");
+                    int quantity = obj.getInt("quantity");
+                    int unit_price = obj.getInt("unit_price");
+
+                    insertStmt.setInt(1, order_id);
+                    insertStmt.setInt(2, product_id);
+                    insertStmt.setInt(3, quantity);
+                    insertStmt.setInt(4, unit_price);
+                    insertStmt.addBatch();
+                }
+                insertStmt.executeBatch();
+            }
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public int addOrderGuest(String guestName, String guestPhone, String guestAddress, int totalMoney, String description, String shippingCode) {
+        String sql = "INSERT INTO OrdersGuest (guest_name, phone, address, order_date, total_money, status, description,shipping_code) VALUES (?, ?, ?, GETDATE(), ?, N'Đã nhận đơn', ?,?)";
+        try (Dbconnect db = new Dbconnect();
+             Connection con = db.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, guestName);
+            ps.setString(2, guestPhone);
+            ps.setString(3, guestAddress);
+            ps.setInt(4, totalMoney);
+            ps.setString(5, description);
+            ps.setString(6, shippingCode);
+            int affectedRows = ps.executeUpdate();
+            if (affectedRows > 0) {
+                ResultSet rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    return rs.getInt(1); // order_id vừa tạo
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    public boolean addOrderDetailsGuest(int order_id, String orderDetailsJson) {
+        String checkOrderDetailsSql = "SELECT COUNT(*) FROM OrderDetailsGuest WHERE order_id = ?";
+        String insertOrderDetailSql = "INSERT INTO OrderDetailsGuest (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)";
+        try (Dbconnect db = new Dbconnect();
+             Connection con = db.getConnection()) {
+
+            try (PreparedStatement checkStmt = con.prepareStatement(checkOrderDetailsSql)) {
+                checkStmt.setInt(1, order_id);
+                ResultSet checkRs = checkStmt.executeQuery();
+                if (checkRs.next() && checkRs.getInt(1) > 0) {
+                    return false;
+                }
+            }
+
+            JSONArray arr = new JSONArray(orderDetailsJson);
+            try (PreparedStatement insertStmt = con.prepareStatement(insertOrderDetailSql)) {
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject obj = arr.getJSONObject(i);
+                    int product_id = obj.getInt("product_id");
+                    int quantity = obj.getInt("quantity");
+                    int unit_price = obj.getInt("unit_price");
+
+                    insertStmt.setInt(1, order_id);
+                    insertStmt.setInt(2, product_id);
+                    insertStmt.setInt(3, quantity);
+                    insertStmt.setInt(4, unit_price);
+                    insertStmt.addBatch();
+                }
+                insertStmt.executeBatch();
+            }
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+public List<Order> getOrdersByUserId(int userId) {
+    List<Order> orders = new ArrayList<>();
+    String sql = "SELECT * FROM Orders WHERE user_id = ? ORDER BY order_date DESC";
+
+    try (Dbconnect db = new Dbconnect();
+         java.sql.Connection con = db.getConnection();
+         java.sql.PreparedStatement ps = con.prepareStatement(sql)) {
+
+        ps.setInt(1, userId);
+        ResultSet rs = ps.executeQuery();
+
+        while (rs.next()) {
+            Order order = new Order();
+            order.setOrderId(rs.getInt("order_id"));
+            order.setCustomerName(rs.getString("user_id")); // Store user_id in customerName field
+            order.setOrderDate(rs.getString("order_date")); // Convert Timestamp to String
+            order.setTotalAmount(rs.getLong("total_money"));
+            order.setStatus(rs.getString("status"));
+            order.setDescription(rs.getString("description"));
+            order.setLoggedIn(true); // Since this is a user order
+            orders.add(order);
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return orders;
+}
+
+    public boolean isShippingCodeValid(String shippingCode) {
+        String sql = "SELECT COUNT(*) FROM Orders WHERE shipping_code = ?";
+        String sql2 = "SELECT COUNT(*) FROM OrdersGuest WHERE shipping_code = ?";
+        try (Dbconnect db = new Dbconnect();
+             Connection con = db.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             PreparedStatement ps2 = con.prepareStatement(sql2)) {
+
+            ps.setString(1, shippingCode);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next() && rs.getInt(1) > 0) {
+                return true;
+            }
+
+            ps2.setString(1, shippingCode);
+            ResultSet rs2 = ps2.executeQuery();
+            if (rs2.next() && rs2.getInt(1) > 0) {
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+
+    }
 
 
 
+    public JSONObject getOrderSummaryByShippingCode(String shippingCode) {
+        String sqlUser = "SELECT u.full_name, o.order_date, o.status, o.description " +
+                "FROM Orders o JOIN Users u ON o.user_id = u.user_id WHERE o.shipping_code = ?";
+        String sqlGuest = "SELECT guest_name, order_date, status, description FROM OrdersGuest WHERE shipping_code = ?";
+        JSONObject orderJson = new JSONObject();
+
+        try (Dbconnect db = new Dbconnect();
+             Connection con = db.getConnection();
+             PreparedStatement psUser = con.prepareStatement(sqlUser);
+             PreparedStatement psGuest = con.prepareStatement(sqlGuest)) {
+
+            psUser.setString(1, shippingCode);
+            ResultSet rs = psUser.executeQuery();
+
+            if (rs.next()) {
+                orderJson.put("customerName", rs.getString("full_name"));
+                orderJson.put("orderDate", rs.getString("order_date"));
+                orderJson.put("status", rs.getString("status"));
+                orderJson.put("description", rs.getString("description"));
+                orderJson.put("items", getOrderItemsDetailByShippingCode(shippingCode, false)); // user
+            } else {
+                psGuest.setString(1, shippingCode);
+                ResultSet rs2 = psGuest.executeQuery();
+                if (rs2.next()) {
+                    orderJson.put("customerName", rs2.getString("guest_name"));
+                    orderJson.put("orderDate", rs2.getString("order_date"));
+                    orderJson.put("status", rs2.getString("status"));
+                    orderJson.put("description", rs2.getString("description"));
+                    orderJson.put("items", getOrderItemsDetailByShippingCode(shippingCode, true)); // guest
+                } else {
+                    return null; // Không tìm thấy đơn hàng
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return orderJson;
+    }
 
 
+    public JSONArray getOrderItemsDetailByShippingCode(String shippingCode, boolean isGuest) {
+        String table, aliasOrder, aliasDetail;
+        if (isGuest) {
+            table = "OrderDetailsGuest odg JOIN OrdersGuest og ON odg.order_id = og.order_id";
+            aliasOrder = "og";
+            aliasDetail = "odg";
+        } else {
+            table = "OrderDetails od JOIN Orders o ON od.order_id = o.order_id";
+            aliasOrder = "o";
+            aliasDetail = "od";
+        }
+        String sql = "SELECT p.product_name, " + aliasDetail + ".quantity, " + aliasDetail + ".unit_price " +
+                "FROM " + table + " JOIN Products p ON " + aliasDetail + ".product_id = p.product_id " +
+                "WHERE " + aliasOrder + ".shipping_code = ?";
+        JSONArray items = new JSONArray();
+        try (Dbconnect db = new Dbconnect();
+             Connection con = db.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, shippingCode);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                JSONObject item = new JSONObject();
+                item.put("productName", rs.getString("product_name"));
+                item.put("quantity", rs.getInt("quantity"));
+                item.put("price", rs.getInt("unit_price"));
+                items.put(item);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return items;
+    }
+
+    public boolean updateOrderStatus(int orderId, String status) {
+        String sql = "UPDATE Orders SET status = ? WHERE order_id = ?";
+        try (Connection con = new Dbconnect().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, status);
+            ps.setInt(2, orderId);
+
+            int rows = ps.executeUpdate();
+            return rows > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public List<Order> getTodayOrderForEmployee() {
+        String sql = "SELECT o.order_id, u.full_name, u.username, o.order_date, o.total_money, o.status, o.description, o.shipping_code " +
+                "FROM Orders o JOIN Users u ON o.user_id = u.user_id " +
+                "WHERE CAST(o.order_date AS DATE) = CAST(GETDATE() AS DATE) and o.status != N'Đã giao'";
+        String sql2 = "SELECT order_id, guest_name, order_date, total_money, status, description, shipping_code " +
+                "FROM OrdersGuest WHERE CAST(order_date AS DATE) = CAST(GETDATE() AS DATE) and status != N'Đã giao'";
+
+        List<Order> orders = new ArrayList<>();
+        try (Dbconnect db = new Dbconnect();
+             Connection con = db.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             PreparedStatement ps2 = con.prepareStatement(sql2);
+             ResultSet rs = ps.executeQuery();
+             ResultSet rs2 = ps2.executeQuery()) {
+
+            while (rs.next()) {
+                Order order = new Order();
+                order.setOrderId(rs.getInt("order_id"));
+                order.setCustomerName(rs.getString("full_name"));
+                order.setUsername(rs.getString("username"));
+                order.setOrderDate(rs.getString("order_date"));
+                order.setTotalAmount(rs.getLong("total_money"));
+                order.setStatus(rs.getString("status"));
+                order.setDescription(rs.getString("description"));
+                order.setShippingCode(rs.getString("shipping_code"));
+                order.setLoggedIn(true);
+
+                JSONArray orderItemsJson = getOrderItemsDetailByShippingCode(order.getShippingCode(), false);
+                List<OrderItem> orderItems = parseOrderItems(orderItemsJson);
+                order.setDetails(orderItems);
+
+                orders.add(order);
+            }
+
+            // Đơn khách vãng lai
+            while (rs2.next()) {
+                Order order = new Order();
+                order.setOrderId(rs2.getInt("order_id"));
+                order.setCustomerName(rs2.getString("guest_name"));
+                order.setOrderDate(rs2.getString("order_date"));
+                order.setTotalAmount(rs2.getLong("total_money"));
+                order.setStatus(rs2.getString("status"));
+                order.setDescription(rs2.getString("description"));
+                order.setShippingCode(rs2.getString("shipping_code"));
+                order.setLoggedIn(false);
+
+                JSONArray orderItemsJson = getOrderItemsDetailByShippingCode(order.getShippingCode(), true);
+                List<OrderItem> orderItems = parseOrderItems(orderItemsJson);
+                order.setDetails(orderItems);
+
+                orders.add(order);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return orders;
+    }
+
+    public static List<OrderItem> parseOrderItems(JSONArray arr) {
+        List<OrderItem> items = new ArrayList<>();
+        for (int i = 0; i < arr.length(); i++) {
+            JSONObject obj = arr.getJSONObject(i);
+            OrderItem item = new OrderItem();
+            item.setProductName(obj.optString("productName"));
+            item.setQuantity(obj.optInt("quantity"));
+            item.setPrice(obj.optLong("price"));
+            items.add(item);
+        }
+        return items;
+    }
 
 
 
 
 }
+
+
+
+
+
+
+
+
+

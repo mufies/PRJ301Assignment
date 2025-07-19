@@ -70,7 +70,7 @@ public class ChangePassword extends HttpServlet {
                 UserDAOImpl userDAOImpl = new UserDAOImpl();
                 boolean isUpdated = userDAOImpl.forgotPassword(email, newPassword);
                 if (isUpdated) {
-                    out.print("{\"success\":true, \"message\":\"Mật khẩu đã được cập nhật thành công\"}");
+                    response.sendRedirect("home");
                 } else {
                     out.print("{\"success\":false, \"message\":\"Cập nhật mật khẩu thất bại\"}");
                 }

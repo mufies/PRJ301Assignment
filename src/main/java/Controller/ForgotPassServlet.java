@@ -24,21 +24,7 @@ import java.util.Random;
 @WebServlet(name = "ForgotPassServlet", urlPatterns = {"/forgotpassword"})
 public class ForgotPassServlet extends HttpServlet {
 
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet ForgotPassServlet</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet ForgotPassServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
+
 
     public static String generateCode(String email) {
         return Jwts.builder()
@@ -83,36 +69,37 @@ public class ForgotPassServlet extends HttpServlet {
 
 
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String email = request.getParameter("email");
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        PrintWriter out = response.getWriter();
+@Override
+protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    String email = request.getParameter("email");
+    response.setContentType("application/json");
+    response.setCharacterEncoding("UTF-8");
+    PrintWriter out = response.getWriter();
 
-        if (email == null || email.isEmpty()) {
-            out.print("{\"success\":false, \"message\":\"Email không được để trống\"}");
-            return;
-        }
-
-
-        String code = generateCode(email);
-
-        if(!new UserDAOImpl().checkEmailExists(email)) {
-            out.print("{\"success\":false, \"message\":\"Email không tồn tại\"}");
-            return;
-        }
-
-        try {
-            sendEmail(email, code);
-            request.getSession().setAttribute("email", email);
-            response.sendRedirect(request.getContextPath() + "/ChangePassword");
-
-        } catch (MessagingException e) {
-            e.printStackTrace();
-            out.print("{\"success\":false, \"message\":\"Gửi email thất bại\"}");
-        }
+    if (email == null || email.isEmpty()) {
+        out.print("{\"success\":false, \"message\":\"Email không được để trống\"}");
+        return;
     }
+
+    if(!new UserDAOImpl().checkEmailExists(email)) {
+        out.print("{\"success\":false, \"message\":\"Email không tồn tại\"}");
+        return;
+    }
+
+    String code = generateCode(email);
+
+    try {
+        sendEmail(email, code);
+        request.getSession().setAttribute("email", email);
+        request.getSession().setAttribute("resetCode", code);
+
+        // Return success response to show the modal instead of redirecting
+        out.print("{\"success\":true, \"message\":\"Mã xác thực đã được gửi đến email của bạn\"}");
+    } catch (MessagingException e) {
+        e.printStackTrace();
+        out.print("{\"success\":false, \"message\":\"Gửi email thất bại\"}");
+    }
+}
 
 //    @Override
 //    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

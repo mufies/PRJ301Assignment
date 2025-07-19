@@ -14,21 +14,7 @@ import java.io.PrintWriter;
 @WebServlet(name = "UserRegister", urlPatterns = {"/register"})
 public class UserRegister extends HttpServlet {
 
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet UserRegister</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet UserRegister at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
+
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -37,25 +23,26 @@ public class UserRegister extends HttpServlet {
         rd.forward(request, response);
     }
 
-    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
-        UserDAOImpl userDAO = new UserDAOImpl();
-        boolean isRegistered = userDAO.registerUser(username, password);
+        String fullName = request.getParameter("full_name");
+        String phone = request.getParameter("phone");
+        String email = request.getParameter("email");
+        String address = request.getParameter("address");
 
-        if (isRegistered) {
-            request.setAttribute("successMessage", "Registration successful! You can now log in.");
-            RequestDispatcher rd = request.getRequestDispatcher("login.jsp");
-            rd.forward(request, response);
+        UserDAOImpl dao = new UserDAOImpl();
+        UserDAOImpl.RegisterResult result = dao.registerUser(username, password, email, phone, address, fullName);
+
+        if (result.isSuccess()) {
+            response.sendRedirect("home");
         } else {
-            request.setAttribute("errorMessage", "Registration failed. Please try again.");
-            RequestDispatcher rd = request.getRequestDispatcher("register.jsp");
-            rd.forward(request, response);
+            request.setAttribute("errorMessage", result.getMessage());
+            request.getRequestDispatcher("register.jsp").forward(request, response);
         }
-
     }
+
 
     @Override
     public String getServletInfo() {

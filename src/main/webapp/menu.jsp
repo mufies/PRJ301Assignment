@@ -11,9 +11,69 @@
     <link rel="stylesheet" href="css/carticon.css">
     <link rel="stylesheet" href="css/search.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script>    const CONTEXT_PATH = "${pageContext.request.contextPath}";
-    </script>
+
+
     <script>
+        const CONTEXT_PATH = "${pageContext.request.contextPath}";
+
+        // ✅ Thêm các function bị thiếu
+        function openLoginModal() {
+            document.getElementById('loginModal').classList.add('active');
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').classList.remove('active');
+        }
+
+        function openLoggedModal() {
+            document.getElementById('loggedModal').classList.add('active');
+        }
+
+        function closeLoggedModal() {
+            document.getElementById('loggedModal').classList.remove('active');
+        }
+
+        function openForgotPassword() {
+            document.getElementById('forgotPasswordModal').classList.add('active');
+        }
+
+        function closeForgotPassword() {
+            document.getElementById('forgotPasswordModal').classList.remove('active');
+            document.getElementById('enterForgotPasswordModal').classList.remove('active');
+        }
+
+        function logout() {
+            localStorage.removeItem('jwt');
+            sessionStorage.removeItem('cart');
+            const loginBtn = document.querySelector('.login-btn');
+            if (loginBtn) {
+                loginBtn.innerHTML = 'Login';
+                loginBtn.onclick = openLoginModal;
+            }
+            window.location.reload();
+        }
+
+        async function isJwtValid(token) {
+            if (!token) return false;
+            try {
+                const requestData = { isJwtValid: token };
+                const response = await fetch('JwtServlet', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                return data.isJwtValid;
+            } catch (e) {
+                return false;
+            }
+        }
+
         function filterMenu(type) {
             const items = document.querySelectorAll('.product-item');
             items.forEach(item => {
@@ -21,117 +81,64 @@
             });
 
             document.querySelectorAll('.category-list li').forEach(li => li.classList.remove('active'));
-            document.getElementById(type).classList.add('active');
+            const activeElement = document.getElementById(type);
+            if (activeElement) activeElement.classList.add('active'); // ✅ Thêm null check
         }
 
-        function openUserModal() {
-            const jwt = localStorage.getItem('jwt');
-            if (isJwtValid(jwt)) {
-                document.getElementById('loggedModal').style.display = 'block';
-            } else {
-                openLoginModal();
-            }
-        }
-
-        function closeLoggedModal() {
-            document.getElementById('loggedModal').style.display = 'none';
-        }
-
-        function updateCartCount() {
-            const jwt = localStorage.getItem('jwt');
-            if (isJwtValid(jwt)) {
-                fetch('menu', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'getUserCart', jwt })
-                })
-                    .then(res => res.json())
-                    .then(cartItems => {
-                        const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-                        document.getElementById('cart-count').textContent = totalQuantity; });
-            } else {
-                const cart = JSON.parse(sessionStorage.getItem('cart')) || [];
-                document.getElementById('cart-count').textContent = cart.length;
-            }
-        }
-        window.onload = function() {
-            const jwt = localStorage.getItem('jwt');
-            const loginBtn = document.querySelector('.login-btn');
-
-            if (jwt && isJwtValid(jwt)) {
-                if (loginBtn) {
-                    loginBtn.innerHTML = '<i class="fa-solid fa-user" style="font-size: 15px"></i>';
-                    loginBtn.onclick = openUserModal;
-                }
-                document.getElementById('loggedModal').style.display = 'none';
-            } else {
-                if (loginBtn) {
-                    loginBtn.innerHTML = 'Login';
-                    loginBtn.onclick = openLoginModal;
-                }
-            }
-            document.getElementById("foodInput").addEventListener("keyup", function() {
-                fetchResults(function(food) {
-                    addToCart(food.id.toString(), food.name, food.img, food.price.toFixed(0).toString());
+        window.onload = async function() { // ✅ Thêm async
+            const foodInput = document.getElementById("foodInput");
+            if (foodInput) { // ✅ Thêm null check
+                foodInput.addEventListener("keyup", function() {
+                    if (typeof fetchResults === 'function') { // ✅ Thêm function check
+                        fetchResults(function(food) {
+                            if (typeof addToCart === 'function') { // ✅ Thêm function check
+                                addToCart(food.id.toString(), food.name, food.img, food.price.toFixed(0).toString());
+                            }
+                        });
+                    }
                 });
-            });
+            }
+
             filterMenu('starter');
-            updateCartCount();
+
+            if (typeof updateCartCount === 'function') { // ✅ Thêm function check
+                await updateCartCount(); // ✅ Thêm await
+            }
         };
 
-        function isJwtValid(token) {
-            if (!token) return false;
-            try {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                return !payload.exp || (Date.now() / 1000 < payload.exp);
-            } catch (e) {
-                return false;
+        // Hàm xử lý sau khi đăng nhập thành công - SYNC TẤT CẢ
+        async function handleLoginSuccess(data) { // ✅ Thêm async
+            localStorage.setItem('jwt', data.token);
+
+            if(data.isAdmin) {
+                window.location.href = 'ayxkix';
+                return;
+            }
+            else if (data.isEmployee) {
+                window.location.href = 'updateOrderStatus';
+                return;
+            }
+
+            // Đối với user thông thường - luôn check sessionStorage
+            const sessionCart = JSON.parse(sessionStorage.getItem('cart') || '[]');
+            if (sessionCart.length > 0) {
+                updateUIAfterLogin();
+                openSessionCartChoiceModal();
+            } else {
+                window.location.reload();
             }
         }
-        function openLoginModal() {
-            document.getElementById('loginModal').style.display = 'block';
-        }
-        function closeLoginModal() {
-            document.getElementById('loginModal').style.display = 'none';
-        }
-        function openForgotPassword() {
-            document.getElementById('forgotPasswordModal').style.display = 'block';
-        }
-        function closeForgotPassword() {
-            document.getElementById('forgotPasswordModal').style.display = 'none';
-        }
-        window.onclick = function(event) {
-            const modal = document.getElementById('loginModal');
-            if (event.target === modal) {
-                closeLoginModal();
-            }
-            const loggedModal = document.getElementById('loggedModal');
-            if (event.target === loggedModal) {
-                closeLoggedModal();
-            }
-        }
-        function logout() {
-            localStorage.removeItem('jwt');
-            document.querySelector('.login-btn').innerHTML = 'Login';
-            document.getElementById('loggedModal').style.display = 'none';
-            updateCartCount();
-            window.location.href = '/menu';
-        }
-
-
-
-
     </script>
+
 </head>
 <body>
 <header>
     <div class="logo">
-        <img src="images/logo.png" alt="Mam Mam Logo">
+        <a href="home"> <img src="images/logo.png" alt="Mam Mam Logo"></a>
     </div>
     <nav>
-        <a href="index.jsp">Home</a>
         <a href="menu">Menu</a>
-        <a href="#">Contact</a>
+        <a href ="tracking">Tracking</a>
         <button class="login-btn" onclick="openLoginModal()">Login</button>
     </nav>
 </header>
@@ -139,11 +146,11 @@
 <!-- Thanh trên cùng: Home > Menu | Search -->
 <div class="menu-top-bar">
     <h2>Home > Menu</h2>
-        <div id="inputContainer">
-            <input type="text" id="foodInput" class="search-box" placeholder="Search...">
-            <div id="suggestionsPopup"></div>
-        </div>
+    <div id="inputContainer">
+        <input type="text" id="foodInput" class="search-box" placeholder="Search...">
+        <div id="suggestionsPopup"></div>
     </div>
+</div>
 
 <!-- Nội dung chính -->
 <div class="menu-page">
@@ -173,6 +180,7 @@
         </div>
     </main>
 </div>
+
 <footer>
     <div class="footer-content">
         <div class="contact-info">
@@ -189,7 +197,7 @@
     </div>
 </footer>
 
-<div id="loginModal" class="modal" style="display: none;">
+<div id="loginModal" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeLoginModal()">&times;</span>
         <img src="images/logo.png" alt="Mam Mam Logo" class="modal-logo">
@@ -197,27 +205,32 @@
         <h2 class="modal-subtitle">VUI LÒNG ĐĂNG NHẬP</h2>
         <form action="login" method="post">
             <label>Username</label>
-            <input type="text" name="username" placeholder="Số điện thoại/ Gmail" required>
+            <input type="text" name="username" placeholder="Username" required>
             <label>Password</label>
             <input type="password" name="password" required>
-            <button type="submit">Submit</button>
+
+            <button type="submit">Đăng nhập</button>
+            <div class="forgot">
+                <button type="button" class="forgot-btn" onclick="closeLoginModal(); openForgotPassword()">Quên mật khẩu?</button>
+            </div>
         </form>
         <p class="register">
-            Bạn chưa có tài khoản? <a href="register.jsp"><strong>Đăng ký ngay</strong></a>
+            Bạn chưa có tài khoản? <a href="register"><strong>Đăng ký ngay</strong></a>
         </p>
     </div>
 </div>
 
-<div id="loggedModal" class="modal" style="display: none;">    <div class="modal-content">
+<div id="loggedModal" class="modal">
+    <div class="modal-content">
         <span class="close" onclick="closeLoggedModal()">&times;</span>
         <img src="images/logo.png" alt="Mam Mam Logo" class="modal-logo">
         <h2 class="modal-subtitle">TÀI KHOẢN CỦA BẠN</h2>
         <div class="user-options" style="justify-content: center; align-items: center;">
-            <button class="option-btn" onclick="window.location.href='settings.jsp'" style="justify-content: center; align-items: center;">
+            <button class="option-btn" onclick="window.location.href='profile'" style="justify-content: center; align-items: center;">
                 <i class="fa-solid fa-gear"></i>
                 Cài đặt tài khoản
             </button>
-            <button class="option-btn" onclick="window.location.href='history.jsp'" style="justify-content: center; align-items: center;">
+            <button class="option-btn" onclick="window.location.href='history'" style="justify-content: center; align-items: center;">
                 <i class="fa-solid fa-clock-rotate-left"></i>
                 Lịch sử mua hàng
             </button>
@@ -226,6 +239,37 @@
                 Đăng xuất
             </button>
         </div>
+    </div>
+</div>
+
+<div id="forgotPasswordModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeForgotPassword()">&times;</span>
+        <h2 class="modal-subtitle">KHÔI PHỤC MẬT KHẨU</h2>
+        <form action="forgotpassword" method="post">
+            <label>Nhập email của bạn:</label>
+            <input type="email" id="email" name="email" required>
+            <button type="submit">Gửi mã xác nhận</button>
+        </form>
+    </div>
+</div>
+
+<div id="enterForgotPasswordModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeForgotPassword()">&times;</span>
+        <h2 class="modal-subtitle">XÁC NHẬN MÃ & ĐẶT LẠI MẬT KHẨU</h2>
+        <form action="ChangePassword" method="post">
+            <label for="code">Nhập mã xác nhận:</label>
+            <input type="text" id="code" name="code" required>
+
+            <label for="newPassword">Nhập mật khẩu mới:</label>
+            <input type="password" id="newPassword" name="new_password" required>
+
+            <label for="confirmPassword">Nhập lại mật khẩu mới:</label>
+            <input type="password" id="confirmPassword" name="confirm_password" required>
+
+            <button type="submit">Xác nhận</button>
+        </form>
     </div>
 </div>
 
@@ -241,15 +285,225 @@
         <span>Total: </span>
         <span class="cart-total-price"></span>
     </div>
-    <button class="checkout-btn" onclick="window.location.href='/checkout'">Checkout</button>
+    <button class="checkout-btn" type="button" id="checkout-btn">Checkout</button>
+</div>
+
+<!-- Modal hỏi dùng giỏ hàng session sau khi login -->
+<div id="sessionCartChoiceModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeSessionCartChoiceModal()">&times;</span>
+        <h2>Bạn có giỏ hàng chưa thanh toán</h2>
+        <p>Bạn có muốn thanh toán các món đã bỏ vào giỏ hàng trước khi đăng nhập không?</p>
+        <div style="margin-top: 18px;">
+            <button onclick="proceedCheckoutWithSessionCart()">Có, thanh toán ngay</button>
+            <button onclick="clearSessionCartAndStay()">Không, xóa giỏ hàng này</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal hỏi đăng nhập khi checkout -->
+<div id="guestCheckoutModal" class="modal">
+    <div class="modal-content" id="guestCheckoutModalContent">
+        <span class="close" onclick="closeGuestCheckoutModal()">&times;</span>
+        <h2>Bạn chưa đăng nhập</h2>
+        <p>Bạn có muốn đăng nhập để lưu đơn hàng vào tài khoản?</p>
+        <div style="margin-top: 18px;">
+            <button onclick="showLoginFormInModal()">Đăng nhập</button>
+            <button onclick="proceedCheckoutAsGuest()">Tiếp tục thanh toán không cần đăng nhập</button>
+        </div>
+    </div>
 </div>
 
 <script>
+    function openSessionCartChoiceModal() {
+        document.getElementById('sessionCartChoiceModal').classList.add('active');
+    }
+    function closeSessionCartChoiceModal() {
+        document.getElementById('sessionCartChoiceModal').classList.remove('active');
+    }
+    function proceedCheckoutWithSessionCart() {
+        closeSessionCartChoiceModal();
+        window.location.href = 'checkout?useSessionCart=true';
+    }
+    function clearSessionCartAndStay() {
+        sessionStorage.removeItem('cart');
+        closeSessionCartChoiceModal();
 
+        updateUIAfterLogin();
+        if (typeof updateCartCount === 'function') {
+            updateCartCount();
+        }
+    }
 
+    function openGuestCheckoutModal() {
+        document.getElementById('guestCheckoutModal').classList.add('active');
+    }
+    function closeGuestCheckoutModal() {
+        document.getElementById('guestCheckoutModal').classList.remove('active');
+        resetGuestCheckoutModal();
+    }
+    function showLoginFormInModal() {
+        const modalContent = document.getElementById('guestCheckoutModalContent');
+        modalContent.innerHTML = `
+        <span class="close" onclick="closeGuestCheckoutModal()">&times;</span>
+        <img src="images/logo.png" alt="Mam Mam Logo" class="modal-logo">
+        <h1 class="modal-title">MĂM MĂM</h1>
+        <h2 class="modal-subtitle">VUI LÒNG ĐĂNG NHẬP</h2>
+        <form id="modalLoginForm" style="margin-top:15px;">
+            <label>Username</label>
+            <input type="text" name="username" placeholder="Username" required>
+            <label>Password</label>
+            <input type="password" name="password" required>
+
+            <button type="submit">Đăng nhập</button>
+            <div class="forgot">
+                <button type="button" class="forgot-btn" onclick="closeGuestCheckoutModal(); openForgotPassword()">Quên mật khẩu?</button>
+            </div>
+        </form>
+        <p class="register">
+            Bạn chưa có tài khoản? <a href="register"><strong>Đăng ký ngay</strong></a>
+        </p>
+    `;
+
+        // Gắn sự kiện submit cho form đăng nhập trong modal
+        document.getElementById('modalLoginForm').onsubmit = async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            try {
+                const response = await fetch('login', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                if (data.success) {
+                    closeGuestCheckoutModal();
+                    await handleLoginSuccess(data); // ✅ Thêm await
+                } else {
+                    alert('Login failed: ' + (data.errorMessage || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Đã xảy ra lỗi khi đăng nhập. Vui lòng thử lại.');
+            }
+        };
+    }
+
+    function resetGuestCheckoutModal() {
+        const modalContent = document.getElementById('guestCheckoutModalContent');
+        modalContent.innerHTML = `
+            <span class="close" onclick="closeGuestCheckoutModal()">&times;</span>
+            <h2>Bạn chưa đăng nhập</h2>
+            <p>Bạn có muốn đăng nhập để lưu đơn hàng vào tài khoản?</p>
+            <div style="margin-top: 18px;">
+              <button onclick="showLoginFormInModal()">Đăng nhập</button>
+              <button onclick="proceedCheckoutAsGuest()">Tiếp tục thanh toán không cần đăng nhập</button>
+            </div>
+        `;
+    }
+    function proceedCheckoutAsGuest() {
+        window.location.href = 'checkout?guest=true';
+    }
+
+    function updateUIAfterLogin() {
+        const loginBtn = document.querySelector('.login-btn');
+        if (loginBtn) {
+            loginBtn.innerHTML = '<i class="fa-solid fa-user"></i>';
+            loginBtn.onclick = function() { openLoggedModal(); };
+
+            loginBtn.classList.remove('login-btn');
+        }
+
+        if (typeof updateCartCount === 'function') {
+            updateCartCount();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', async function() { // ✅ Thêm async
+        if (sessionStorage.getItem('showSessionCartChoice') === '1') {
+            sessionStorage.removeItem('showSessionCartChoice');
+            openSessionCartChoiceModal();
+        }
+
+        const checkoutBtn = document.getElementById('checkout-btn');
+        if (checkoutBtn) {
+            checkoutBtn.onclick = async function(e) { // ✅ Thêm async
+                e.preventDefault();
+                const jwt = localStorage.getItem('jwt');
+                if (!(await isJwtValid(jwt))) { // ✅ Thêm await và sửa logic
+                    openGuestCheckoutModal();
+                } else {
+                    const sessionCart = JSON.parse(sessionStorage.getItem('cart') || '[]');
+                    if (sessionCart.length > 0) {
+                        showCartChoiceModal();
+                    } else {
+                        window.location.href = 'checkout';
+                    }
+                }
+            }
+        }
+
+        // ✅ Sửa form login chính
+        const loginForm = document.querySelector('#loginModal form');
+        if (loginForm) {
+            loginForm.onsubmit = async function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+
+                try {
+                    const response = await fetch('login', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+
+                    if (data.success) {
+                        closeLoginModal();
+                        await handleLoginSuccess(data); // ✅ Thêm await
+                    } else {
+                        alert('Login failed: ' + (data.errorMessage || 'Unknown error'));
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    alert('Đã xảy ra lỗi khi đăng nhập. Vui lòng thử lại.');
+                }
+            };
+        }
+    });
+
+    function showCartChoiceModal() {
+        const modal = document.createElement('div');
+        modal.id = 'cartChoiceModal';
+        modal.className = 'modal';
+        modal.innerHTML = `
+        <div class="modal-content">
+            <span class="close" onclick="closeCartChoiceModal()">&times;</span>
+            <h2>Bạn có giỏ hàng chưa thanh toán</h2>
+            <p>Bạn có muốn thanh toán các món đã bỏ vào giỏ hàng trước khi đăng nhập không?</p>
+            <div style="margin-top: 18px;">
+                <button onclick="proceedCheckoutWithSessionCart()">Có, thanh toán ngay</button>
+                <button onclick="clearSessionCartAndStay()">Không, xóa giỏ hàng này</button>
+            </div>
+        </div>
+    `;
+        document.body.appendChild(modal);
+        modal.classList.add('active');
+    }
+
+    function closeCartChoiceModal() {
+        const modal = document.getElementById('cartChoiceModal');
+        if (modal) {
+            modal.classList.remove('active');
+            setTimeout(() => {
+                document.body.removeChild(modal);
+            }, 300);
+        }
+    }
 </script>
+
+<script src="js/loginUtils.js"></script>
 <script src="js/cart.js"></script>
 <script src="js/search.js"></script>
+
 
 </body>
 </html>

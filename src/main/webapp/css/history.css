@@ -1,0 +1,60 @@
+/* Tổng thể */
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #fff3e6; /* Nền trắng kem */
+    margin: 0;
+    padding: 20px;
+    color: #333;
+}
+
+/* Tiêu đề */
+h2 {
+    color: #b22222; /* Đỏ đậm */
+    font-size: 28px;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* Bảng đơn hàng */
+table {
+    width: 80%;
+    margin: 0 auto;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+thead {
+    background-color: #b22222; /* Đỏ đậm */
+    color: white;
+}
+
+th, td {
+    padding: 12px 16px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tbody tr:hover {
+    background-color: #ffe6e6;
+    transition: background-color 0.3s ease;
+}
+
+/* Thông báo không có đơn hàng */
+#no-orders {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 18px;
+}
+
+/* Responsive (tuỳ chọn) */
+@media (max-width: 768px) {
+    table {
+        width: 100%;
+        font-size: 14px;
+    }
+}

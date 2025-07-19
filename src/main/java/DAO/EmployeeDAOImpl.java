@@ -42,7 +42,7 @@ public class EmployeeDAOImpl {
     public Employee getEmployeeById(int employeeId) {
         Employee employee = null;
 
-        String sql = "SELECT * FROM Employee WHERE employeeId = ?";
+        String sql = "SELECT * FROM Employee WHERE employee_id = ?";
         try (Dbconnect db = new Dbconnect();
              java.sql.Connection con = db.getConnection();
              java.sql.PreparedStatement ps = con.prepareStatement(sql)) {
@@ -53,11 +53,11 @@ public class EmployeeDAOImpl {
             if (rs.next()) {
                 String username = rs.getString("username");
                 String password = rs.getString("password");
-                String fullName = rs.getString("fullName");
+                String fullName = rs.getString("full_name");
                 String email = rs.getString("email");
                 String phone = rs.getString("phone");
                 String address = rs.getString("address");
-                java.util.Date hireDate = rs.getDate("hireDate");
+                java.util.Date hireDate = rs.getDate("hire_date");
                 String position = rs.getString("position");
                 long salary = rs.getLong("salary");
                 String status = rs.getString("status");
@@ -126,6 +126,46 @@ public class EmployeeDAOImpl {
              java.sql.PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1, employeeId);
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public int getEmployeeByUsername(String username) {
+        int employeeId = -1;
+        String sql = "SELECT employee_id FROM Employee WHERE username = ?";
+
+        try (Dbconnect db = new Dbconnect();
+             java.sql.Connection con = db.getConnection();
+             java.sql.PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, username);
+            java.sql.ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                employeeId = rs.getInt("employee_id");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return employeeId;
+    }
+
+    public boolean updateEmployee(int employeeId, String password, String fullName, String email, String phone, String address) {
+        String sql = "UPDATE Employee SET  password = ?, full_name = ?, email = ?, phone = ?, address = ? WHERE employee_id = ?";
+        try (Dbconnect db = new Dbconnect();
+             java.sql.Connection con = db.getConnection();
+             java.sql.PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, password);
+            ps.setString(2, fullName);
+            ps.setString(3, email);
+            ps.setString(4, phone);
+            ps.setString(5, address);
+            ps.setInt(6, employeeId);
+
             int rowsAffected = ps.executeUpdate();
             return rowsAffected > 0;
         } catch (Exception e) {

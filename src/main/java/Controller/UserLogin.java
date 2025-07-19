@@ -29,16 +29,26 @@ protected void doPost(HttpServletRequest request, HttpServletResponse response)
     System.out.println("Attempting to log in with username: " + username);
     User user = userDAO.loginUser(username, password);
     Admin admin = userDAO.loginAdmin(username, password);
+    Employee employee = userDAO.loginEmployee(username, password);
 
     if (user != null) {
         String token = JwtUtils.generateToken(username, "User");
         System.out.println("Token generated: " + token);
+        System.out.println("User");
         out.print("{\"success\":true, \"token\":\"" + token + "\"}");
+
     }
     else if (admin != null) {
         String token = JwtUtils.generateToken(username, "Admin");
         System.out.println("Token generated for admin: " + token);
+        System.out.println("Admin");
         out.print("{\"success\":true, \"token\":\"" + token + "\", \"isAdmin\":true}");
+    }
+    else if (employee != null) {
+        String token = JwtUtils.generateToken(username, "Employee");
+        System.out.println("Token generated for employee: " + token);
+        System.out.println("Employee");
+        out.print("{\"success\":true, \"token\":\"" + token + "\", \"isEmployee\":true}");
     }
     else {
         out.print("{\"success\":false, \"message\":\"Invalid credentials\"}");
