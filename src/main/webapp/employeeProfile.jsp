@@ -91,6 +91,35 @@
         font-weight: bold;
     }
 </style>
+<script>
+    function logout()
+    {
+        localStorage.removeItem('jwt');
+        window.location.href = 'home';
+    }
+    const token = localStorage.getItem('jwt');
+    if (!isJwtValid(token)) {
+        window.location.replace('<%=request.getContextPath()%>/menu');
+    } else {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            if (payload.role !== 'Employee') {
+                window.location.replace('<%=request.getContextPath()%>/menu');
+            }
+        } catch (e) {
+            window.location.replace('<%=request.getContextPath()%>/menu');
+        }
+    }
+    function isJwtValid(token) {
+        if (!token) return false;
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return !payload.exp || (Date.now() / 1000 < payload.exp);
+        } catch (e) {
+            return false;
+        }
+    }
+</script>
 <body>
 <header>
     <div class="logo">
@@ -100,6 +129,9 @@
         <a href="updateOrderStatus">Dashboard</a>
         <a href="employeeCheckingOrder">Create Order</a>
         <a href="updateEmployee">Update Info</a>
+        <a href="#" onclick="logout()">Logout</a>
+
+
     </nav>
 </header>
 <div class="form-container">

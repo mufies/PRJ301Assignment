@@ -51,7 +51,17 @@ public class MenuServlet extends HttpServlet {
         String requestBody = sb.toString();
 
         JSONObject json = new JSONObject(requestBody);
+        if (!json.has("jwt")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"error\":\"Missing JWT\"}");
+            return;
+        }
         String jwt = json.getString("jwt");
+        if (jwt == null || jwt.isEmpty()) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"error\":\"Empty JWT\"}");
+            return;
+        }
         String username = JwtUtils.getUsernameFromToken(jwt);
         UserDAOImpl userDAO = new UserDAOImpl();
         int userID = userDAO.getUserId(username);

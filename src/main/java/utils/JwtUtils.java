@@ -80,7 +80,8 @@ public class JwtUtils {
                 return null;
             }
 
-            String decryptedToken = decrypt(token);
+//            String decryptedToken = decrypt(token);
+            String decryptedToken = token; // Assuming the token is already in the correct format
             return Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()

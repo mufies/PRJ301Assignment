@@ -14,7 +14,7 @@
 <!-- Header -->
 <header>
     <div class="logo">
-        <a href="home"> <img src="images/logo.png" alt="Mam Mam Logo"> </a>
+        <a href="menu"> <img src="images/logo.png" alt="Mam Mam Logo"> </a>
     </div>
 
 </header>

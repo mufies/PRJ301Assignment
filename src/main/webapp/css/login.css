@@ -132,3 +132,17 @@
     }
     .modal-logo { width: 80px; }
 }
+.user-btn {
+    background: #8B4513;
+    border: none;
+    color: #FFEBD6;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 4px;
+}
+
+.user-btn i {
+    font-size: 15px;
+}
+
