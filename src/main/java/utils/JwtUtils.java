@@ -41,9 +41,9 @@ public class JwtUtils {
         }
     }
 
-    public static String generateToken(String username,String role) {
+    public static String generateToken(int id,String role) {
         return encrypt(Jwts.builder()
-                .setSubject(username)
+                .setSubject(String.valueOf(id))
                 .claim("role", role)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 30 * 60 * 1000))
@@ -52,16 +52,37 @@ public class JwtUtils {
         );
     }
 
-    public static boolean validateToken(String token, String username) {
-        String subject = Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(decrypt(token))
-                .getBody()
-                .getSubject();
-        return subject.equals(username);
+    public static boolean validateToken(String token, String id) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(decrypt(token))
+                    .getBody();
+
+            String subject = claims.getSubject();
+            Date expiration = claims.getExpiration();
+            Date now = new Date();
+
+            // Kiểm tra subject và thời hạn token
+            return subject.equals(id) && expiration.after(now);
+
+        } catch (ExpiredJwtException e) {
+            // Token đã hết hạn
+            System.out.println("Token expired: " + e.getMessage());
+            return false;
+        } catch (JwtException e) {
+            // Token không hợp lệ (signature sai, format sai, etc.)
+            System.out.println("Invalid token: " + e.getMessage());
+            return false;
+        } catch (Exception e) {
+            // Lỗi khác (decrypt failed, etc.)
+            System.out.println("Token validation error: " + e.getMessage());
+            return false;
+        }
     }
-    public static String getUsernameFromToken(String token1) {
+
+    public static String getIDFromToken(String token1) {
         if (token1 == null || token1.trim().isEmpty()) {
             return null;
         }

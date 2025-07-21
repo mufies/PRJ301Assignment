@@ -69,11 +69,11 @@ public class CheckoutServlet extends HttpServlet {
                 JSONArray items = jsonRequest.getJSONArray("items");
 
                 // Xác thực JWT và lấy username
-                String username = JwtUtils.getUsernameFromToken(jwt);
-                if (username == null) throw new Exception("Invalid JWT token");
+                String id = JwtUtils.getIDFromToken(jwt);
+                if (id == null) throw new Exception("Invalid JWT token");
 
                 UserDAOImpl userDAO = new UserDAOImpl();
-                int userId = userDAO.getUserId(username);
+                int userId = Integer.parseInt(id);
 
                 if (userId > 0) {
                     int totalAmount = 0;

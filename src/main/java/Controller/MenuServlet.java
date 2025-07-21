@@ -62,9 +62,9 @@ public class MenuServlet extends HttpServlet {
             response.getWriter().write("{\"error\":\"Empty JWT\"}");
             return;
         }
-        String username = JwtUtils.getUsernameFromToken(jwt);
+        String id = JwtUtils.getIDFromToken(jwt);
         UserDAOImpl userDAO = new UserDAOImpl();
-        int userID = userDAO.getUserId(username);
+        int userID = Integer.parseInt(id);
         cart = userDAO.getUserCart(userID);
 
         JSONArray cartJson = new JSONArray();
@@ -110,10 +110,10 @@ public class MenuServlet extends HttpServlet {
 
         JSONObject json = new JSONObject(requestBody);
         String jwt = json.getString("jwt");
-        String username = JwtUtils.getUsernameFromToken(jwt);
-        System.out.println("Username extracted from token: " + username);
+        String id = JwtUtils.getIDFromToken(jwt);
+        System.out.println("id extracted from token: " + id);
         UserDAOImpl userDAO = new UserDAOImpl();
-        int userID = userDAO.getUserId(username);
+        int userID = Integer.parseInt(id);
         int productID = Integer.parseInt(json.getString("productId"));
         MenuDAOImpl menuDAO = new MenuDAOImpl();
         System.out.println("Adding product with ID: " + productID + " to cart for user ID: " + userID);
@@ -148,10 +148,10 @@ public class MenuServlet extends HttpServlet {
 
         JSONObject json = new JSONObject(requestBody);
         String jwt = json.getString("jwt");
-        String username = JwtUtils.getUsernameFromToken(jwt);
-        System.out.println("Username extracted from token: " + username);
+        String id = JwtUtils.getIDFromToken(jwt);
+        System.out.println("Id extracted from token: " + id);
         UserDAOImpl userDAO = new UserDAOImpl();
-        int userID = userDAO.getUserId(username);
+        int userID = Integer.parseInt(id);
         int productID = Integer.parseInt(json.getString("productId"));
         MenuDAOImpl menuDAO = new MenuDAOImpl();
 

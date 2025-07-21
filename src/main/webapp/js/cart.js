@@ -78,7 +78,9 @@ async function updateLoggedInCart() {
     try {
         const response = await fetch('menu', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json' ,
+                // 'Authorization': `Bearer ${jwt}`
+                },
             body: JSON.stringify({ action: 'getUserCart', jwt })
         });
 

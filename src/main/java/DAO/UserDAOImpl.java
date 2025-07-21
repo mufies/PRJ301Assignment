@@ -476,6 +476,54 @@ public class UserDAOImpl {
     }
 
 
+    public User getUserById(int id) {
+        String sql = "SELECT username, password, full_name, email, phone, address FROM Users WHERE user_id = ?";
+
+        try (Dbconnect db = new Dbconnect();
+             java.sql.Connection con = db.getConnection();
+             java.sql.PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                User user = new User();
+                user.setUsername(rs.getString("username"));
+                user.setPassword(rs.getString("password"));
+                user.setFullName(rs.getString("full_name"));
+                user.setEmail(rs.getString("email"));
+                user.setPhoneNumber(rs.getString("phone"));
+                user.setAddress(rs.getString("address"));
+                return user;
+            } else {
+                System.out.println("Không có dữ liệu cho id: " + id);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public String getUserUsername(int userId) {
+        String sql = "SELECT username FROM Users WHERE user_id = ?";
+        try (Dbconnect db = new Dbconnect();
+             java.sql.Connection con = db.getConnection();
+             java.sql.PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getString("username");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
 
 
 

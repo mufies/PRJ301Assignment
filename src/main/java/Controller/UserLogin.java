@@ -32,20 +32,20 @@ protected void doPost(HttpServletRequest request, HttpServletResponse response)
     Employee employee = userDAO.loginEmployee(username, password);
 
     if (user != null) {
-        String token = JwtUtils.generateToken(username, "User");
+        String token = JwtUtils.generateToken(user.getId(), "User");
         System.out.println("Token generated: " + token);
         System.out.println("User");
         out.print("{\"success\":true, \"token\":\"" + token + "\"}");
 
     }
     else if (admin != null) {
-        String token = JwtUtils.generateToken(username, "Admin");
+        String token = JwtUtils.generateToken(admin.getAdminId(), "Admin");
         System.out.println("Token generated for admin: " + token);
         System.out.println("Admin");
         out.print("{\"success\":true, \"token\":\"" + token + "\", \"isAdmin\":true}");
     }
     else if (employee != null) {
-        String token = JwtUtils.generateToken(username, "Employee");
+        String token = JwtUtils.generateToken(employee.getEmployeeId(), "Employee");
         System.out.println("Token generated for employee: " + token);
         System.out.println("Employee");
         out.print("{\"success\":true, \"token\":\"" + token + "\", \"isEmployee\":true}");
