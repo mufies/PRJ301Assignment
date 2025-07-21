@@ -407,7 +407,6 @@
         </p>
     `;
 
-        // Gắn sự kiện submit cho form đăng nhập trong modal
         document.getElementById('modalLoginForm').onsubmit = async function(e) {
             e.preventDefault();
             const formData = new FormData(this);
@@ -449,7 +448,7 @@
     function updateUIAfterLogin() {
         const loginBtn = document.querySelector('.login-btn');
         if (loginBtn) {
-            loginBtn.innerHTML = '<i class="fa-solid fa-user"></i>';
+            loginBtn.innerHTML = '<i class="fa-solid fa-user" style="font-size: 15px"></i>';
             loginBtn.onclick = function() { openLoggedModal(); };
 
             loginBtn.classList.remove('login-btn');

@@ -22,8 +22,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static java.lang.System.out;
-
 @WebServlet("/history")
 public class GetUserOrdersServlet extends HttpServlet {
     @Override
@@ -58,7 +56,9 @@ public class GetUserOrdersServlet extends HttpServlet {
             }
             String jwt = json.getString("jwt");
 
-            String username = JwtUtils.getUsernameFromToken(jwt);
+            String id = JwtUtils.getIDFromToken(jwt);
+            UserDAOImpl userDAO = new UserDAOImpl();
+            String username = userDAO.getUserUsername(Integer.parseInt(id));
 
             OrderDAOImpl orderDAO = new OrderDAOImpl();
             List<Order> allOrders = orderDAO.getAllOrders();

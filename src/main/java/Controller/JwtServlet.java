@@ -38,7 +38,7 @@ public class JwtServlet extends HttpServlet {
 
             if (jsonObject.has("isJwtValid")) {
                 String token = jsonObject.get("isJwtValid").getAsString();
-                String username = JwtUtils.getUsernameFromToken(token);
+                String username = JwtUtils.getIDFromToken(token);
                 boolean isValid = JwtUtils.validateToken(token, username);
                 responseJson.addProperty("isJwtValid", isValid);
 

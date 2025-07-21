@@ -61,7 +61,6 @@ public class updateEmployee extends HttpServlet {
   private void updateEmployeeInfo(String jwt, JSONObject jsonBody, HttpServletResponse response) {
       try {
           // Verify JWT user has permission
-          String username = JwtUtils.getUsernameFromToken(jwt);
 
           int employeeId = jsonBody.getInt("employee_id");
           String password = jsonBody.getString("password");
@@ -98,9 +97,10 @@ public class updateEmployee extends HttpServlet {
 
     private void getEmployeeInfo(String jwt, HttpServletResponse response) throws IOException {
         try {
-            String username = JwtUtils.getUsernameFromToken(jwt);
+            String id = JwtUtils.getIDFromToken(jwt);
+
             EmployeeDAOImpl dao = new EmployeeDAOImpl();
-            int employeeId = dao.getEmployeeByUsername(username);
+            int employeeId = Integer.parseInt(id);
 
             if (employeeId != -1) {
                 Employee employee = dao.getEmployeeById(employeeId);

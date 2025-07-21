@@ -71,9 +71,9 @@ protected void doPost(HttpServletRequest request, HttpServletResponse response)
 
 private void getUserInfo(String jwt, HttpServletResponse response) throws IOException {
     try {
-        String username = JwtUtils.getUsernameFromToken(jwt);
+        String id = JwtUtils.getIDFromToken(jwt);
         UserDAOImpl dao = new UserDAOImpl();
-        User user = dao.getUserByUsername(username);
+        User user = dao.getUserById(Integer.parseInt(id));
 
         if (user != null) {
             JSONObject json = new JSONObject();
@@ -94,9 +94,9 @@ private void getUserInfo(String jwt, HttpServletResponse response) throws IOExce
 
 private void updateUserInfo(String jwt, JSONObject jsonBody, HttpServletResponse response) {
     try {
-        String username = JwtUtils.getUsernameFromToken(jwt);
+        String id = JwtUtils.getIDFromToken(jwt);
         UserDAOImpl dao = new UserDAOImpl();
-        User user = dao.getUserByUsername(username);
+        User user = dao.getUserById(Integer.parseInt(id));
 
         if (user == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
