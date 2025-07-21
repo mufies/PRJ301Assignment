@@ -12,67 +12,7 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="stylesheet" href="css/admin.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <script>
-
-        const token = localStorage.getItem('jwt');
-        if (!await isJwtValid(token)) {
-            window.location.replace('<%=request.getContextPath()%>/menu');
-        } else {
-            try {
-                const getRole = await getRoleFromJwt(token);
-                if (getRole !== 'Admin') {
-                    window.location.replace('<%=request.getContextPath()%>/menu');
-                }
-            } catch (e) {
-                window.location.replace('<%=request.getContextPath()%>/menu');
-            }
-        }
-        async function isJwtValid(token) {
-            if (!token) return false;
-            try {
-                const requestData = { isJwtValid: token };
-                const response = await fetch('JwtServlet', {  // ✅ Thêm 'await'
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(requestData)
-                });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();  // ✅ Thêm 'await'
-                return data.isJwtValid;
-            } catch (e) {
-                console.log("❌ Lỗi khi kiểm tra JWT:", e);
-                return false;
-            }
-        }
-        async function getRoleFromJwt(token) {
-            if (!token) return null;
-
-            try {
-                const requestData = { getRole: token };
-                const response = await callJwtServlet(requestData);
-
-                if (response.error) {
-                    console.error('Error getting role from JWT:', response.error);
-                    return null;
-                }
-
-                return response.getRole;
-
-            } catch (error) {
-                console.error('Error calling JwtServlet:', error);
-                return null;
-            }
-        }
-
-    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-
-
 </head>
 <body>
 
@@ -189,9 +129,82 @@
 <script src="js/chart/chartData.js"></script>
 <script src="js/chart/chartConfig.js"></script>
 <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+        try {
+            const token = localStorage.getItem('jwt');
+
+            if (!token) {
+                window.location.replace('<%=request.getContextPath()%>/menu');
+                return;
+            }
+
+            const isValid = await isJwtValid(token);
+            if (!isValid) {
+                window.location.replace('<%=request.getContextPath()%>/menu');
+                return;
+            }
+
+            const role = await getRoleFromJwt(token);
+            if (role !== 'Admin') {
+                window.location.replace('<%=request.getContextPath()%>/menu');
+                return;
+            }
+        } catch (error) {
+            console.error('Lỗi xác thực:', error);
+            window.location.replace('<%=request.getContextPath()%>/menu');
+        }
+    });
+
+    async function isJwtValid(token) {
+        if (!token) return false;
+        try {
+            const requestData = { isJwtValid: token };
+            const response = await fetch('JwtServlet', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.isJwtValid;
+        } catch (error) {
+            console.error("Lỗi khi kiểm tra JWT:", error);
+            return false;
+        }
+    }
+
+    async function getRoleFromJwt(token) {
+        if (!token) return null;
+        try {
+            const requestData = { getRole: token };
+            const response = await fetch('JwtServlet', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.getRole;
+        } catch (error) {
+            console.error('Lỗi lấy role từ JWT:', error);
+            return null;
+        }
+    }
     function logout() {
         localStorage.removeItem('jwt');
-        window.location.href = '<%=request.getContextPath()%>/home'; // ✅ Thêm context path
+        window.location.href = '<%=request.getContextPath()%>/home';
     }
 </script>
 </body>
