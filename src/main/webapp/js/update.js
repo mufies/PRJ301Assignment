@@ -58,28 +58,42 @@ async function loadOrderHistory() {
             const row = document.createElement("tr");
             row.classList.add("order-row");
 
+            const canDelete = order.status === "Chờ xử lý";
+
             row.innerHTML = `
-                <td>${order.orderDate || 'N/A'}</td>
-                <td>${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(order.totalPrice || 0)}</td>
-                <td>${order.status || 'Unknown'}</td>
-            `;
+        <td>${order.orderDate || 'N/A'}</td>
+        <td>${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(order.totalPrice || 0)}</td>
+        <td>
+            ${order.status || 'Unknown'}
+        </td>
+          <td>
+        ${canDelete ? `
+            <button onclick="deleteOrder(event, ${order.orderId})"
+                    style="background-color:#ff4d4d;color:white;border:none;padding:6px 12px;border-radius:5px;cursor:pointer;">
+                Hủy Đơn Hàng
+            </button>
+        ` : `<span style="color:gray;">-</span>`}
+    </td>
+    `;
 
             const detailRow = document.createElement("tr");
             detailRow.classList.add("order-details");
             detailRow.style.display = "none";
             detailRow.innerHTML = `
-                <td colspan="4">
-                    <strong>Mô tả:</strong> ${order.description || 'Không có'}<br>
-                    <strong>Sản phẩm:</strong>
-                    <ul>
-                        ${(order.items || []).map(item => `
-                            <li>${item.productName || 'Unknown Product'} - SL: ${item.quantity || 0} - Giá: ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price || 0)}</li>
-                        `).join("")}
-                    </ul>
-                </td>
-            `;
+        <td colspan="4">
+            <strong>Mô tả:</strong> ${order.description || 'Không có'}<br>
+            <strong>Sản phẩm:</strong>
+            <ul>
+                ${(order.items || []).map(item => `
+                    <li>${item.productName || 'Unknown Product'} - SL: ${item.quantity || 0} - Giá: ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price || 0)}</li>
+                `).join("")}
+            </ul>
+        </td>
+    `;
 
-            row.addEventListener("click", () => {
+            row.addEventListener("click", (e) => {
+                // Không toggle nếu người dùng bấm vào nút Xoá
+                if (e.target.tagName.toLowerCase() === 'button') return;
                 const isVisible = detailRow.style.display !== "none";
                 detailRow.style.display = isVisible ? "none" : "table-row";
             });
@@ -87,6 +101,7 @@ async function loadOrderHistory() {
             tbody.appendChild(row);
             tbody.appendChild(detailRow);
         });
+
     } catch (err) {
         console.error("❌ Lỗi khi load lịch sử:", err);
         alert("Không thể tải lịch sử mua hàng: " + err.message);
@@ -113,5 +128,30 @@ async function isJwtValid(token) {
     } catch (e) {
         console.log("❌ Lỗi khi kiểm tra JWT:", e);
         return false;
+    }
+}
+
+async function deleteOrder(event, orderId) {
+    event.stopPropagation();
+
+    if (!confirm("Bạn có chắc chắn muốn xoá đơn hàng này không?")) return;
+
+    try {
+        const response = await fetch("deleteOrder", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: "orderId=" + orderId
+        });
+
+        const data = await response.json();
+        alert(data.message);
+        if (data.success) {
+            loadOrderHistory(); // Reload lại đơn hàng
+        }
+    } catch (err) {
+        console.error("❌ Lỗi khi xoá đơn hàng:", err);
+        alert("Không thể xoá đơn hàng: " + err.message);
     }
 }

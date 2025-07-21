@@ -2,6 +2,12 @@ function updateStatus(orderId) {
     const select = document.getElementById(`status-` + orderId);
     const newStatus = select.value;
 
+    if (newStatus === 'Hủy đơn') {
+        // Gọi hàm xóa thay vì update
+        deleteOrder({ stopPropagation: () => {} }, orderId);
+        return;
+    }
+
     $.ajax({
         url: 'updateOrderStatus',
         method: 'POST',
@@ -78,6 +84,7 @@ function loadOrders() {
                         <option${order.status === 'Đã nhận' ? ' selected' : ''}>Đã nhận</option>
                         <option${order.status === 'Đang làm' ? ' selected' : ''}>Đang làm</option>
                         <option${order.status === 'Đã giao' ? ' selected' : ''}>Đã giao</option>
+                        <option${order.status === 'Hủy đơn' ? ' selected' : ''}>Hủy đơn</option>
                     `;
                 const row = `
                     <tr>
@@ -111,3 +118,29 @@ $(document).ready(function() {
         }
     });
 });
+
+async function deleteOrder(event, orderId) {
+    if (event && event.stopPropagation) event.stopPropagation();
+
+    if (!confirm("Bạn có chắc chắn muốn xoá đơn hàng này không?")) return;
+
+    try {
+        const response = await fetch("deleteOrder", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: "orderId=" + orderId
+        });
+
+        const data = await response.json();
+        alert(data.message);
+        if (data.success) {
+            loadOrders();
+        }
+    } catch (err) {
+        console.error("❌ Lỗi khi xoá đơn hàng:", err);
+        alert("Không thể xoá đơn hàng: " + err.message);
+    }
+}
+

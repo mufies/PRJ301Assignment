@@ -100,6 +100,7 @@
         <th>Ngày đặt</th>
         <th>Tổng tiền</th>
         <th>Trạng thái</th>
+        <th>Hành động</th>
     </tr>
     </thead>
     <tbody id="order-history-body">
@@ -129,6 +130,8 @@
     </div>
 </div>
 <script src="js/update.js"></script>
+
+<
 
 <script>
     const contextPath = "${pageContext.request.contextPath}";
