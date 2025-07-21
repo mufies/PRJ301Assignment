@@ -402,7 +402,7 @@ public List<OrderItem> getGuestOrderItems(int orderId) {
     }
 
     public int addOrder(int user_id, int total_money, String description, String shippingCode) {
-        String sql = "INSERT INTO Orders (user_id, order_date, total_money, status, description, shipping_code) VALUES (?, GETDATE(), ?, N'Đã nhận đơn', ?,?)";
+        String sql = "INSERT INTO Orders (user_id, order_date, total_money, status, description, shipping_code) VALUES (?, GETDATE(), ?, N'Chờ xử lý', ?,?)";
         try (Dbconnect db = new Dbconnect();
              Connection con = db.getConnection();
              PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -743,6 +743,38 @@ public List<Order> getOrdersByUserId(int userId) {
         }
         return items;
     }
+
+    public boolean deleteOrderIfPending(int orderId) {
+        String deleteDetailsSQL = "DELETE FROM OrderDetails WHERE order_id = ?";
+        String deleteOrderSQL = "DELETE FROM Orders WHERE order_id = ? AND status = N'Chờ xử lý'";
+        try (Dbconnect db = new Dbconnect();
+             java.sql.Connection con = db.getConnection();) {
+            con.setAutoCommit(false);
+
+            try (
+                    PreparedStatement ps1 = con.prepareStatement(deleteDetailsSQL);
+                    PreparedStatement ps2 = con.prepareStatement(deleteOrderSQL)
+            ) {
+                ps1.setInt(1, orderId);
+                ps1.executeUpdate();
+
+                ps2.setInt(1, orderId);
+                int rows = ps2.executeUpdate();
+
+                con.commit(); // Thành công
+                return rows > 0;
+            } catch (Exception ex) {
+                con.rollback(); // Nếu có lỗi thì rollback
+                ex.printStackTrace();
+            } finally {
+                con.setAutoCommit(true);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 
 
 
